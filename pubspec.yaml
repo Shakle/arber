@@ -18,6 +18,11 @@ dependencies:
   flutter_bloc: ^8.0.1
   hydrated_bloc: ^8.1.0
 
+  window_size:
+    git:
+      url: https://github.com/google/flutter-desktop-embedding.git
+      path: plugins/window_size
+
   cupertino_icons: ^1.0.5
 
 dev_dependencies:

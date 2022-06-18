@@ -1,3 +1,9 @@
+/Users/shakle/.pub-cache/git/flutter-desktop-embedding-5c51870ced62a00e809ba4b81a846a052d241c9f/plugins/window_size/LICENSE
+/Users/shakle/.pub-cache/git/flutter-desktop-embedding-5c51870ced62a00e809ba4b81a846a052d241c9f/plugins/window_size/lib/src/platform_window.dart
+/Users/shakle/.pub-cache/git/flutter-desktop-embedding-5c51870ced62a00e809ba4b81a846a052d241c9f/plugins/window_size/lib/src/screen.dart
+/Users/shakle/.pub-cache/git/flutter-desktop-embedding-5c51870ced62a00e809ba4b81a846a052d241c9f/plugins/window_size/lib/src/window_size_channel.dart
+/Users/shakle/.pub-cache/git/flutter-desktop-embedding-5c51870ced62a00e809ba4b81a846a052d241c9f/plugins/window_size/lib/src/window_size_utils.dart
+/Users/shakle/.pub-cache/git/flutter-desktop-embedding-5c51870ced62a00e809ba4b81a846a052d241c9f/plugins/window_size/lib/window_size.dart
 /Users/shakle/.pub-cache/hosted/pub.dartlang.org/async-2.8.2/LICENSE
 /Users/shakle/.pub-cache/hosted/pub.dartlang.org/bloc-8.0.3/LICENSE
 /Users/shakle/.pub-cache/hosted/pub.dartlang.org/bloc-8.0.3/lib/bloc.dart
@@ -896,12 +902,14 @@
 /Users/shakle/Development/flutter/packages/flutter_tools/lib/src/build_system/targets/macos.dart
 /Users/shakle/Development/flutter_projects/arber/lib/application.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/enums.dart
+/Users/shakle/Development/flutter_projects/arber/lib/data/models/pathway.dart
 /Users/shakle/Development/flutter_projects/arber/lib/logic/blocs/path/path_cubit.dart
 /Users/shakle/Development/flutter_projects/arber/lib/logic/blocs/path/path_state.dart
 /Users/shakle/Development/flutter_projects/arber/lib/main.dart
 /Users/shakle/Development/flutter_projects/arber/lib/services/file_service.dart
 /Users/shakle/Development/flutter_projects/arber/lib/theme/theme.dart
 /Users/shakle/Development/flutter_projects/arber/lib/view/screens/main_screen.dart
+/Users/shakle/Development/flutter_projects/arber/lib/view/widgets/buttons/arb_button.dart
 /Users/shakle/Development/flutter_projects/arber/lib/view/widgets/buttons/file_picker_button.dart
 /Users/shakle/Development/flutter_projects/arber/lib/view/widgets/path_input.dart
 /Users/shakle/Development/flutter_projects/arber/pubspec.yaml

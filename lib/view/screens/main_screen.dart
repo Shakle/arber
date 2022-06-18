@@ -1,3 +1,4 @@
+import 'package:arber/logic/blocs/arb/arb_cubit.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
 import 'package:arber/view/widgets/buttons/arb_button.dart';
 import 'package:arber/view/widgets/buttons/file_picker_button.dart';
@@ -89,8 +90,12 @@ class MainScreen extends StatelessWidget {
   }
 
   Widget arbButton() {
-    return const Center(
-        child: ArbButton(),
+    return BlocBuilder<ArbCubit, ArbState>(
+      builder: (context, state) {
+        return const Center(
+            child: ArbButton(),
+        );
+      }
     );
   }
 }

@@ -12,7 +12,8 @@ class ArbCubit extends Cubit<ArbState> {
   final ArbService _arbService = ArbService();
   final FileService _fileService = FileService();
 
-  void generateARBs(String filePath) {
-    List<Arb> arbs = _arbService.getArbs(filePath);
+  void generateARBs(String excelPath, String l10nPath) {
+    List<Arb> arbs = _arbService.getArbs(excelPath);
+    _fileService.writeArbFiles(l10nPath, arbs);
   }
 }

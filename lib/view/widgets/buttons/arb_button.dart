@@ -26,7 +26,10 @@ class ArbButton extends StatelessWidget {
 
           if (state is PathConnected) {
             context.read<ArbCubit>()
-                .generateARBs(state.pathArtifact.excelFile.path);
+                .generateARBs(
+                state.pathArtifact.excelFile.path,
+                state.pathArtifact.l10nDirectory,
+            );
           }
         },
         child: const Text('Create Arb files'),

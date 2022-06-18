@@ -27,7 +27,12 @@ class PathCubit extends Cubit<PathState> {
   Directory get l10nDirectory => Directory(l10nDirectoryPathController.text);
 
   void _pathListener(Timer timer) {
-    if (excelFile.existsSync() && l10nDirectory.existsSync()) {
+    bool excelSuccess = excelFilePathController.text.isNotEmpty
+        && excelPathValidator() == null;
+    bool l10nSuccess = l10nDirectoryPathController.text.isNotEmpty
+        && l10nPathValidator() == null;
+
+    if (excelSuccess && l10nSuccess) {
       emit(PathConnected(
           pathArtifact: PathArtifact(
             excelFile: excelFile,
@@ -36,11 +41,9 @@ class PathCubit extends Cubit<PathState> {
     } else {
       emit(PathConnectionFailed(
         successArtifacts: [
-          if (excelFilePathController.text.isNotEmpty
-              && excelFile.existsSync())
+          if (excelSuccess)
             ArtifactType.excel,
-          if (l10nDirectoryPathController.text.isNotEmpty
-              && l10nDirectory.existsSync())
+          if (l10nSuccess)
             ArtifactType.l10n,
         ],
         failedArtifacts: [
@@ -53,6 +56,11 @@ class PathCubit extends Cubit<PathState> {
 
   String? excelPathValidator() {
     if (excelFilePathController.text.isNotEmpty && !excelFile.existsSync()) {
+      return '';
+    }
+
+    if (excelFile.existsSync()
+        && !excelFile.path.split('.').last.contains('xlsx')) {
       return '';
     }
 

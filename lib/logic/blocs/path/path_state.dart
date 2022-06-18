@@ -11,7 +11,7 @@ class PathConnected extends PathState {
   PathConnected({required this.pathArtifact});
 }
 class PathConnectionFailed extends PathState {
-  final List<ArtifactType> failedArtifacts;
+  final List<FileException> failedArtifacts;
   final List<ArtifactType> successArtifacts;
 
   PathConnectionFailed({

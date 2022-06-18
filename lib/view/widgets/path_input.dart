@@ -64,7 +64,7 @@ class PathInput extends StatelessWidget {
     if (state is PathConnectionFailed) {
       if (state.successArtifacts.contains(artifactType)) {
         return BorderSide(color: successColor);
-      } else if (state.failedArtifacts.contains(artifactType)) {
+      } else if (state.failedArtifacts.any((e) => e.artifactType == artifactType)) {
         return const BorderSide(color: Colors.red);
       }
     }

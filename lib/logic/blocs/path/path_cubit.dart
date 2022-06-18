@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:arber/data/enums.dart';
+import 'package:arber/data/models/file_exception.dart';
 import 'package:arber/data/models/pathway.dart';
 import 'package:arber/services/file_service.dart';
 import 'package:flutter/material.dart';
@@ -47,8 +48,14 @@ class PathCubit extends Cubit<PathState> {
             ArtifactType.l10n,
         ],
         failedArtifacts: [
-          if (excelPathValidator() != null) ArtifactType.excel,
-          if (l10nPathValidator() != null) ArtifactType.l10n,
+          if (excelPathValidator() != null) FileException(
+              artifactType: ArtifactType.excel,
+              exceptionMessage: excelPathValidator()!,
+          ),
+          if (l10nPathValidator() != null) FileException(
+            artifactType: ArtifactType.l10n,
+            exceptionMessage: l10nPathValidator()!,
+          ),
         ],
       ));
     }
@@ -56,12 +63,12 @@ class PathCubit extends Cubit<PathState> {
 
   String? excelPathValidator() {
     if (excelFilePathController.text.isNotEmpty && !excelFile.existsSync()) {
-      return '';
+      return 'File does not exist';
     }
 
     if (excelFile.existsSync()
         && !excelFile.path.split('.').last.contains('xlsx')) {
-      return '';
+      return 'File must be .xlsx';
     }
 
     return null;
@@ -71,7 +78,7 @@ class PathCubit extends Cubit<PathState> {
     if (l10nDirectoryPathController.text.isNotEmpty
         && !l10nDirectory.existsSync()
     ) {
-      return '';
+      return 'Directory does not exist';
     }
 
     return null;

@@ -1,12 +1,13 @@
 import 'package:arber/logic/blocs/arb/arb_cubit.dart';
 import 'package:arber/theme/colors.dart';
+import 'package:arber/view/widgets/animations/dash.dart';
+import 'package:arber/view/widgets/animations/success_animation_Icon.dart';
 import 'package:arber/view/widgets/background_field.dart';
 import 'package:arber/view/widgets/basf_logo.dart';
 import 'package:arber/view/widgets/buttons/arb_button.dart';
 import 'package:arber/view/widgets/inputs/input_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rive/rive.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -38,6 +39,12 @@ class MainScreen extends StatelessWidget {
             ),
           ],
         ),
+        const Spacer(),
+        const Align(
+            alignment: Alignment(0.95, 0),
+            child: DashAnimation(),
+        ),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -61,25 +68,12 @@ class MainScreen extends StatelessWidget {
       builder: (context, state) {
         return Row(
           children: [
-            successIcon(state),
+            SuccessAnimationIcon(state: state),
             const SizedBox(width: 10),
             const ArbButton(),
           ],
         );
       }
-    );
-  }
-
-  Widget successIcon(ArbState state) {
-    return Visibility(
-      visible: state is ArbDone,
-      child: const SizedBox(
-        height: 35,
-        width: 35,
-        child: RiveAnimation.asset(
-          'assets/animations/success_icon.riv',
-        ),
-      ),
     );
   }
 }

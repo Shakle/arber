@@ -18,6 +18,7 @@ dependencies:
   excel: ^2.0.0-null-safety-3
 
   flutter_bloc: ^8.0.1
+  computer: ^3.2.1
 
   window_size:
     git:

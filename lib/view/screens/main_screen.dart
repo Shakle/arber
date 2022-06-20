@@ -1,7 +1,7 @@
 import 'package:arber/logic/blocs/arb/arb_cubit.dart';
 import 'package:arber/theme/colors.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
-import 'package:arber/view/widgets/animations/success_animation_Icon.dart';
+import 'package:arber/view/widgets/animations/success_animation.dart';
 import 'package:arber/view/widgets/background_field.dart';
 import 'package:arber/view/widgets/basf_logo.dart';
 import 'package:arber/view/widgets/buttons/arb_button.dart';
@@ -68,12 +68,33 @@ class MainScreen extends StatelessWidget {
       builder: (context, state) {
         return Row(
           children: [
-            SuccessAnimationIcon(state: state),
+            Visibility(
+                visible: state is ArbDone,
+                child: const Tooltip(
+                    message: 'Arb files are already in l10 directory',
+                    child: SuccessAnimationIcon(),
+                ),
+            ),
+            Visibility(
+              visible: state is ArbFailed,
+              child: failIcon(),
+            ),
             const SizedBox(width: 10),
             const ArbButton(),
           ],
         );
       }
+    );
+  }
+
+  Widget failIcon() {
+    return Tooltip(
+      message: 'Arb generation failed',
+      child: Icon(
+          Icons.close,
+          size: 30,
+          color: Colors.red.shade700,
+      ),
     );
   }
 }

@@ -18,32 +18,48 @@ class ArbButton extends StatelessWidget {
         PathState pathState = context.watch<PathCubit>().state;
         ArbState arbState = context.watch<ArbCubit>().state;
 
-        bool isActive = pathState is PathConnected
-            && arbState is! ArbGenerating;
+        bool isActive = pathState is PathConnected;
+        bool isGenerating = arbState is ArbGenerating;
 
         return AbsorbPointer(
-          absorbing: !isActive,
-          child: TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: isActive ? smoothBlue : Colors.grey.shade200,
-                primary: isActive ? Colors.white : Colors.grey,
-                padding: const EdgeInsets.all(20),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+          absorbing: !isActive || isGenerating,
+          child: SizedBox(
+            height: 48,
+            width: 180,
+            child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: isActive ? smoothBlue : Colors.grey.shade200,
+                  primary: isActive ? Colors.white : Colors.grey,
+                  padding: const EdgeInsets.all(20),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-              ),
-              onPressed: () {
-                if (isActive) {
-                  context.read<ArbCubit>().generateARBs(
-                    pathState.pathArtifact.excelFile.path,
-                    pathState.pathArtifact.l10nDirectory,
-                  );
-                }
-              },
-              child: const Text('Create translations'),
+                onPressed: () {
+                  if (isActive && !isGenerating) {
+                    context.read<ArbCubit>().generateARBs(
+                      pathState.pathArtifact.excelFile.path,
+                      pathState.pathArtifact.l10nDirectory,
+                    );
+                  }
+                },
+                child: isGenerating
+                    ? loader()
+                    : const Text('Create translations'),
+            ),
           ),
         );
       }
+    );
+  }
+
+  Widget loader() {
+    return const SizedBox(
+        height: 17,
+        width: 17,
+        child: CircularProgressIndicator(
+            color: Colors.white
+        ),
     );
   }
 }

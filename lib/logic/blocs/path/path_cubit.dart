@@ -12,7 +12,7 @@ part 'path_state.dart';
 
 class PathCubit extends Cubit<PathState> {
   PathCubit() : super(PathInitial()) {
-    pathTimer = Timer.periodic(const Duration(milliseconds: 200), _pathListener);
+    pathTimer = Timer.periodic(const Duration(milliseconds: 100), _pathListener);
   }
 
   final FileService _fileService = FileService();

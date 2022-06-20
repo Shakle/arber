@@ -8,3 +8,9 @@ class ArbInitial extends ArbState {}
 class ArbGenerating extends ArbState {}
 
 class ArbDone extends ArbState {}
+
+class ArbFailed extends ArbState {
+  final dynamic exception;
+
+  ArbFailed(this.exception);
+}

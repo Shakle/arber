@@ -1,5 +1,7 @@
 import 'package:arber/data/enums.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
+import 'package:arber/theme/colors.dart';
+import 'package:arber/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -29,7 +31,7 @@ class PathInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(
-        maxWidth: 550,
+        maxWidth: 450,
       ),
       child: input(),
     );
@@ -43,14 +45,10 @@ class PathInput extends StatelessWidget {
           child: TextFormField(
             autovalidateMode: AutovalidateMode.always,
             controller: controller,
+            style: AppTheme.inputTextStyle,
             decoration: InputDecoration(
               hintText: hint,
-              enabledBorder: Theme.of(context).inputDecorationTheme
-                  .enabledBorder
-                  ?.copyWith(borderSide: getBorderSide(state)),
-              focusedBorder: Theme.of(context).inputDecorationTheme
-                  .focusedBorder
-                  ?.copyWith(borderSide: getBorderSide(state)),
+              suffixIcon: getIcon(state),
             ),
           ),
         );
@@ -58,19 +56,49 @@ class PathInput extends StatelessWidget {
     );
   }
 
-  BorderSide? getBorderSide(PathState state) {
-    Color successColor = Colors.green;
+  Widget errorIcon(PathConnectionFailed state) {
+    String message = state.failedArtifacts.firstWhere((e)
+      => e.artifactType == artifactType).exceptionMessage;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 5),
+      child: Tooltip(
+        message: message,
+        child: Icon(
+          Icons.error_outline_rounded,
+          color: Colors.red.shade700,
+        ),
+      ),
+    );
+  }
+
+  Widget successIcon() {
+    return const Padding(
+      padding: EdgeInsets.only(right: 10),
+      child: Tooltip(
+          message: 'Connected',
+          child: Icon(
+            Icons.done,
+            color: smoothBlue,
+          ),
+      ),
+    );
+  }
+
+  Widget? getIcon(PathState state) {
 
     if (state is PathConnectionFailed) {
       if (state.successArtifacts.contains(artifactType)) {
-        return BorderSide(color: successColor);
-      } else if (state.failedArtifacts.any((e) => e.artifactType == artifactType)) {
-        return const BorderSide(color: Colors.red);
+        return successIcon();
+      } else if (
+        state.failedArtifacts.any((e) => e.artifactType == artifactType)
+      ) {
+        return errorIcon(state);
       }
     }
 
     if (state is PathConnected) {
-      return BorderSide(color:successColor);
+      return successIcon();
     }
 
     return null;

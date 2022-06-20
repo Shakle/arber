@@ -1,90 +1,57 @@
 import 'package:arber/logic/blocs/arb/arb_cubit.dart';
-import 'package:arber/logic/blocs/path/path_cubit.dart';
+import 'package:arber/theme/colors.dart';
+import 'package:arber/view/widgets/background_field.dart';
+import 'package:arber/view/widgets/basf_logo.dart';
 import 'package:arber/view/widgets/buttons/arb_button.dart';
-import 'package:arber/view/widgets/buttons/file_picker_button.dart';
-import 'package:arber/view/widgets/path_input.dart';
+import 'package:arber/view/widgets/inputs/input_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rive/rive.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-          padding: EdgeInsets.all(MediaQuery.of(context).size.height * 0.05),
-          child: body()),
-    );
-  }
-
-  Widget body() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(child: title()),
-          Expanded(child: inputs()),
-          Expanded(child: arbButton()),
-        ],
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: backgroundGradient,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: body(context),
       ),
     );
   }
 
-  Widget title() {
-    return Builder(
-      builder: (context) {
-        return Center(
-          child: Text(
-            'Let\'s connect',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        );
-      }
-    );
-  }
-
-  Widget inputs() {
-    return Builder(
-      builder: (context) {
-        PathCubit pathCubit = context.read<PathCubit>();
-
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+  Widget body(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            inputRow(
-                input: PathInput.excelPath(
-                    controller: pathCubit.excelFilePathController,
-                ),
-                fileButton: FilePickerButton.file(
-                  controller: pathCubit.excelFilePathController,
-                ),
-            ),
-            const SizedBox(height: 10),
-            inputRow(
-              input: PathInput.l10nPath(
-                controller: pathCubit.l10nDirectoryPathController,
-              ),
-              fileButton: FilePickerButton.directory(
-                controller: pathCubit.l10nDirectoryPathController,
-              ),
+            const Expanded(flex: 3, child: BasfLogo()),
+            const Spacer(),
+            BackgroundField(
+              child: inputsAndGenerateButton(),
             ),
           ],
-        );
-      }
+        ),
+      ],
     );
   }
 
-  Widget inputRow({
-    required PathInput input,
-    required FilePickerButton fileButton,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+  Widget inputsAndGenerateButton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        input,
-        const SizedBox(width: 20),
-        fileButton,
+        const FileInputs(),
+        const SizedBox(height: 20),
+        Padding(
+            padding: const EdgeInsets.only(right: 60),
+            child: arbButton(),
+        ),
       ],
     );
   }
@@ -92,10 +59,27 @@ class MainScreen extends StatelessWidget {
   Widget arbButton() {
     return BlocBuilder<ArbCubit, ArbState>(
       builder: (context, state) {
-        return const Center(
-            child: ArbButton(),
+        return Row(
+          children: [
+            successIcon(state),
+            const SizedBox(width: 10),
+            const ArbButton(),
+          ],
         );
       }
+    );
+  }
+
+  Widget successIcon(ArbState state) {
+    return Visibility(
+      visible: state is ArbDone,
+      child: const SizedBox(
+        height: 35,
+        width: 35,
+        child: RiveAnimation.asset(
+          'assets/animations/success_icon.riv',
+        ),
+      ),
     );
   }
 }

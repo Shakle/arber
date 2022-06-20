@@ -1,5 +1,6 @@
 import 'package:arber/data/enums.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
+import 'package:arber/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,7 +40,14 @@ class _FilePickerButtonState extends State<FilePickerButton> {
         onPressed: isLoading
             ? null
             : () => onPressed(context.read<PathCubit>()),
-        icon: isLoading ? loader() : const Icon(Icons.folder_rounded)
+        icon: isLoading ? loader() : fileIcon(),
+    );
+  }
+
+  Widget fileIcon() {
+    return const Icon(
+        Icons.folder_outlined,
+        color: Colors.black54,
     );
   }
 
@@ -47,7 +55,7 @@ class _FilePickerButtonState extends State<FilePickerButton> {
     return const SizedBox(
         height: 20,
         width: 20,
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(color: smoothBlue),
     );
   }
 

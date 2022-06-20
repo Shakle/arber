@@ -1130,6 +1130,7 @@
 /Users/shakle/Development/flutter_projects/arber/lib/application.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/enums.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/models/arb.dart
+/Users/shakle/Development/flutter_projects/arber/lib/data/models/file_exception.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/models/pathway.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/models/translation.dart
 /Users/shakle/Development/flutter_projects/arber/lib/logic/blocs/arb/arb_cubit.dart

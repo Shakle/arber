@@ -26,6 +26,7 @@ class PathCubit extends Cubit<PathState> {
   late final Timer pathTimer;
 
   File get excelFile => File(excelFilePathController.text);
+  File get arbFile => File(arbFilePathController.text);
 
   Directory get l10nDirectory => Directory(l10nDirectoryPathController.text);
 
@@ -34,33 +35,66 @@ class PathCubit extends Cubit<PathState> {
         && excelPathValidator() == null;
     bool l10nSuccess = l10nDirectoryPathController.text.isNotEmpty
         && l10nPathValidator() == null;
+    bool arbSuccess = arbFilePathController.text.isNotEmpty
+        && arbPathValidator() == null;
 
-    if (excelSuccess && l10nSuccess) {
-      emit(PathConnected(
-          pathArtifact: PathArtifact(
-            excelFile: excelFile,
-            l10nDirectory: l10nDirectory.path,
-      )));
+    if (excelSuccess && l10nSuccess && arbPathValidator() == null) {
+      emitSuccess(arbSuccess);
     } else {
-      emit(PathConnectionFailed(
-        successArtifacts: [
-          if (excelSuccess)
-            ArtifactType.excel,
-          if (l10nSuccess)
-            ArtifactType.l10n,
-        ],
-        failedArtifacts: [
-          if (excelPathValidator() != null) FileException(
-              artifactType: ArtifactType.excel,
-              exceptionMessage: excelPathValidator()!,
-          ),
-          if (l10nPathValidator() != null) FileException(
-            artifactType: ArtifactType.l10n,
-            exceptionMessage: l10nPathValidator()!,
-          ),
-        ],
-      ));
+      emitConnectionFailed(
+          arbSuccess: arbSuccess,
+          excelSuccess: excelSuccess,
+          l10nSuccess: l10nSuccess,
+      );
     }
+  }
+
+  void emitSuccess(bool arbSuccess) {
+    emit(PathConnected(
+        pathArtifact: PathArtifact(
+          excelFile: excelFile,
+          l10nDirectory: l10nDirectory.path,
+        ),
+        failedArtifacts: [
+          if (!arbSuccess) FileException(
+            artifactType: ArtifactType.mainArb,
+            exceptionMessage: arbPathValidator() != null
+                ? arbPathValidator()!
+                : 'Main arb was not synced',
+          ),
+        ],
+    ));
+  }
+
+  void emitConnectionFailed({
+    required bool excelSuccess,
+    required bool l10nSuccess,
+    required bool arbSuccess,
+  }) {
+    emit(PathConnectionFailed(
+      successArtifacts: [
+        if (excelSuccess)
+          ArtifactType.excel,
+        if (l10nSuccess)
+          ArtifactType.l10n,
+        if (arbSuccess)
+          ArtifactType.mainArb,
+      ],
+      failedArtifacts: [
+        if (excelPathValidator() != null) FileException(
+          artifactType: ArtifactType.excel,
+          exceptionMessage: excelPathValidator()!,
+        ),
+        if (l10nPathValidator() != null) FileException(
+          artifactType: ArtifactType.l10n,
+          exceptionMessage: l10nPathValidator()!,
+        ),
+        if (arbPathValidator() != null) FileException(
+          artifactType: ArtifactType.mainArb,
+          exceptionMessage: arbPathValidator()!,
+        ),
+      ],
+    ));
   }
 
   String? excelPathValidator() {
@@ -71,6 +105,19 @@ class PathCubit extends Cubit<PathState> {
     if (excelFile.existsSync()
         && !excelFile.path.split('.').last.contains('xlsx')) {
       return 'File must be .xlsx';
+    }
+
+    return null;
+  }
+
+  String? arbPathValidator() {
+    if (arbFilePathController.text.isNotEmpty && !arbFile.existsSync()) {
+      return 'File does not exist';
+    }
+
+    if (arbFile.existsSync()
+        && !arbFile.path.split('.').last.contains('arb')) {
+      return 'File must be .arb';
     }
 
     return null;

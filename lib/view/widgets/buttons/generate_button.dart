@@ -37,7 +37,7 @@ class GenerateButton extends StatelessWidget {
                 ),
                 onPressed: () {
                   if (isActive && !isGenerating) {
-                    context.read<ArbCubit>().generateARBs(
+                    context.watch<ArbCubit>().generateARBs(
                       pathState.pathArtifact.excelFile.path,
                       pathState.pathArtifact.l10nDirectory,
                     );

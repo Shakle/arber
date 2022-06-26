@@ -80,6 +80,22 @@ class PathInput extends StatelessWidget {
     );
   }
 
+  Widget warningIcon(PathConnected state) {
+    String message = state.failedArtifacts.firstWhere((e)
+    => e.artifactType == artifactType).exceptionMessage;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 5),
+      child: Tooltip(
+        message: message,
+        child: const Icon(
+          Icons.info_outline_rounded,
+          color: Colors.amber,
+        ),
+      ),
+    );
+  }
+
   Widget successIcon() {
     return const Padding(
       padding: EdgeInsets.only(right: 10),
@@ -106,7 +122,11 @@ class PathInput extends StatelessWidget {
     }
 
     if (state is PathConnected) {
-      return successIcon();
+      if (state.failedArtifacts.any((e) => e.artifactType == artifactType)) {
+        return warningIcon(state);
+      } else {
+        return successIcon();
+      }
     }
 
     return null;

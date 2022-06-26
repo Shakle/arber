@@ -30,7 +30,10 @@ class MainScreen extends StatelessWidget {
   Widget body(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+        SizedBox(height: MediaQuery
+            .of(context)
+            .size
+            .height * 0.1),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -75,8 +78,8 @@ class MainScreen extends StatelessWidget {
         const FileInputs(),
         const SizedBox(height: 20),
         Padding(
-            padding: const EdgeInsets.only(right: 60),
-            child: generateButton(),
+          padding: const EdgeInsets.only(right: 60),
+          child: generateButton(),
         ),
       ],
     );
@@ -84,25 +87,25 @@ class MainScreen extends StatelessWidget {
 
   Widget generateButton() {
     return BlocBuilder<ArbCubit, ArbState>(
-      builder: (context, state) {
-        return Row(
-          children: [
-            Visibility(
+        builder: (context, state) {
+          return Row(
+            children: [
+              Visibility(
                 visible: state is ArbDone,
                 child: const Tooltip(
-                    message: 'Arb files are already in l10 directory',
-                    child: SuccessAnimationIcon(),
+                  message: 'Arb files are already in l10 directory',
+                  child: SuccessAnimationIcon(),
                 ),
-            ),
-            Visibility(
-              visible: state is ArbFailed,
-              child: failIcon(),
-            ),
-            const SizedBox(width: 10),
-            const GenerateButton(),
-          ],
-        );
-      }
+              ),
+              Visibility(
+                visible: state is ArbFailed,
+                child: failIcon(),
+              ),
+              const SizedBox(width: 10),
+              const GenerateButton(),
+            ],
+          );
+        }
     );
   }
 
@@ -110,9 +113,9 @@ class MainScreen extends StatelessWidget {
     return Tooltip(
       message: 'Arb generation failed',
       child: Icon(
-          Icons.close,
-          size: 30,
-          color: Colors.red.shade700,
+        Icons.close,
+        size: 30,
+        color: Colors.red.shade700,
       ),
     );
   }

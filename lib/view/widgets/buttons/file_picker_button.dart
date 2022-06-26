@@ -9,8 +9,10 @@ class FilePickerButton extends StatefulWidget {
   FilePickerButton.file({
     super.key,
     required this.controller,
+    required ArtifactType artifactType,
   }) {
     pickType = PickType.file;
+    _artifactType = artifactType;
   }
 
   FilePickerButton.directory({
@@ -21,6 +23,7 @@ class FilePickerButton extends StatefulWidget {
   }
 
   late final PickType pickType;
+  late final ArtifactType? _artifactType;
   final TextEditingController controller;
 
   @override
@@ -64,7 +67,12 @@ class _FilePickerButtonState extends State<FilePickerButton> {
 
     switch (widget.pickType) {
       case PickType.file:
-        await pathCubit.pickExcelFile();
+        if (widget._artifactType == ArtifactType.excel) {
+          await pathCubit.pickExcelFile();
+        }
+        if (widget._artifactType == ArtifactType.mainArb) {
+          await pathCubit.pickMainArbFile();
+        }
         break;
       case PickType.directory:
         await pathCubit.pickL10nDirectory();

@@ -18,6 +18,8 @@ class PathCubit extends Cubit<PathState> {
   final FileService _fileService = FileService();
   final TextEditingController excelFilePathController
     = TextEditingController();
+  final TextEditingController arbFilePathController
+  = TextEditingController();
   final TextEditingController l10nDirectoryPathController
     = TextEditingController();
 
@@ -84,11 +86,23 @@ class PathCubit extends Cubit<PathState> {
     return null;
   }
 
+  Future<String?> pickFile() async {
+    return await _fileService.getFilePath();
+  }
+
   Future<void> pickExcelFile() async {
-    String? filePath = await _fileService.getFilePath();
+    String? filePath = await pickFile();
 
     if (filePath != null) {
       excelFilePathController.text = filePath;
+    }
+  }
+
+  Future<void> pickMainArbFile() async {
+    String? filePath = await pickFile();
+
+    if (filePath != null) {
+      arbFilePathController.text = filePath;
     }
   }
 

@@ -15,6 +15,14 @@ class PathInput extends StatelessWidget {
     artifactType = ArtifactType.excel;
   }
 
+  PathInput.mainArbPath({
+    super.key,
+    required this.controller,
+  }) {
+    hint = 'Main arb file path';
+    artifactType = ArtifactType.mainArb;
+  }
+
   PathInput.l10nPath({
     super.key,
     required this.controller,

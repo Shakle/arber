@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 class BackgroundField extends StatelessWidget {
   const BackgroundField({
     super.key,
+    required this.borderRadius,
     required this.child,
   });
 
   final Widget child;
+  final BorderRadius borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -26,22 +28,10 @@ class BackgroundField extends StatelessWidget {
         borderRadius: borderRadius,
           color: Colors.white,
           child: Padding(
-            padding: const EdgeInsets.only(
-              top: 40,
-              bottom: 40,
-              left: 40,
-              right: 80,
-            ),
+            padding: const EdgeInsets.all(40),
             child: child,
           ),
       ),
-    );
-  }
-
-  BorderRadius get borderRadius {
-    return const BorderRadius.only(
-      topLeft: Radius.circular(15),
-      bottomLeft: Radius.circular(15),
     );
   }
 }

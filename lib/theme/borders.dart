@@ -13,3 +13,7 @@ BorderRadius get rightRoundBorderRadius {
     bottomRight: Radius.circular(15),
   );
 }
+
+BorderRadius get allRoundBorderRadius {
+  return BorderRadius.circular(15);
+}

@@ -1,4 +1,5 @@
 import 'package:arber/data/enums.dart';
+import 'package:arber/logic/blocs/arb/arb_cubit.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
 import 'package:arber/theme/colors.dart';
 import 'package:arber/theme/theme.dart';
@@ -46,7 +47,14 @@ class PathInput extends StatelessWidget {
   }
 
   Widget input() {
-    return BlocBuilder<PathCubit, PathState>(
+    return BlocConsumer<PathCubit, PathState>(
+      listenWhen: (prevState, state) => state is! PathConnected,
+      listener: (context, state) {
+        ArbCubit cubit = context.read<ArbCubit>();
+        if (cubit.state is ArbDone) {
+          cubit.reset();
+        }
+      },
       buildWhen: (prevState, state) => state is! PathInitial,
       builder: (context, state) {
         return Form(

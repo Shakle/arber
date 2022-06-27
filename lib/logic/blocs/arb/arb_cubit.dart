@@ -13,6 +13,8 @@ class ArbCubit extends Cubit<ArbState> {
   final ArbService _arbService = ArbService();
   final FileService _fileService = FileService();
 
+  void reset() => emit(ArbInitial());
+
   Future<void> generateARBs(String excelPath, String l10nPath) async {
     late final Computer computer;
 

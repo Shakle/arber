@@ -30,14 +30,14 @@ class MainScreen extends StatelessWidget {
   Widget body(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: MediaQuery
-            .of(context)
-            .size
-            .height * 0.1),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Expanded(flex: 3, child: BasfLogo()),
+            const Expanded(
+                flex: 3,
+                child: BasfLogo(),
+            ),
             const Spacer(),
             BackgroundField(
               borderRadius: leftRoundBorderRadius,
@@ -45,16 +45,35 @@ class MainScreen extends StatelessWidget {
             ),
           ],
         ),
+        const Spacer(),
         Expanded(
+          flex: 2,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               BackgroundField(
                 borderRadius: rightRoundBorderRadius,
                 child: const ArbInput(),
               ),
               const Spacer(),
+              Expanded(
+                flex: 7,
+                child: BackgroundField(
+                  borderRadius: allRoundBorderRadius,
+                  child: ListView(
+                    children: const [
+                      Center(child: Text('test')),
+                      Center(child: Text('test')),
+                      Center(child: Text('test')),
+                      Center(child: Text('test')),
+                      Center(child: Text('test')),
+                      Center(child: Text('test')),
+                      Center(child: Text('test')),
+                    ],
+                  ),
+                ),
+              ),
+              const Spacer(flex: 3,),
             ],
           ),
         ),
@@ -90,16 +109,19 @@ class MainScreen extends StatelessWidget {
         builder: (context, state) {
           return Row(
             children: [
-              Visibility(
-                visible: state is ArbDone,
-                child: const Tooltip(
-                  message: 'Arb files are already in l10 directory',
-                  child: SuccessAnimationIcon(),
-                ),
-              ),
-              Visibility(
-                visible: state is ArbFailed,
-                child: failIcon(),
+              Stack(
+                children: [
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 250),
+                    opacity: state is ArbDone ? 1 : 0,
+                    child: const SuccessAnimationIcon(),
+                  ),
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 250),
+                    opacity: state is ArbFailed ? 1 : 0,
+                    child: failIcon(),
+                  ),
+                ],
               ),
               const SizedBox(width: 10),
               const GenerateButton(),

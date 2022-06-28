@@ -13,6 +13,7 @@ class ArbService {
 
   ArbData getArbExcelDifference(List<String> paths) {
     Sheet? sheet = _getExcelSheet(paths[0]);
+    String arbPath = paths[1];
 
     if (sheet == null) {
       throw Exception('Excel file can\'t be read');
@@ -21,9 +22,11 @@ class ArbService {
     List<String> excelTranslationKeys = _getExcelTranslationKeys(sheet);
 
     return ArbData(
-        missingKeys: _getArbTranslationKeys(paths[1])
-            .where((key) => !excelTranslationKeys.contains(key))
-            .toList(),
+        missingKeys: arbPath.isEmpty
+            ? []
+            : _getArbTranslationKeys(paths[1])
+                .where((key) => !excelTranslationKeys.contains(key))
+                .toList(),
         missingTranslations: _getMissingTranslations(sheet),
     );
   }

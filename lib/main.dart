@@ -15,8 +15,8 @@ void main() async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     WindowOptions windowOptions = const WindowOptions(
       minimumSize: Size(1000, 700),
-      size: Size(1000, 700),
-      center: true,
+      size: Size(1050, 750),
+      backgroundColor: Colors.transparent,
       titleBarStyle: TitleBarStyle.hidden,
     );
 

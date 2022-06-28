@@ -6,6 +6,7 @@ import 'package:arber/view/widgets/animations/success_animation.dart';
 import 'package:arber/view/widgets/background_field.dart';
 import 'package:arber/view/widgets/basf_logo.dart';
 import 'package:arber/view/widgets/buttons/generate_button.dart';
+import 'package:arber/view/widgets/description.dart';
 import 'package:arber/view/widgets/inputs/arb_input.dart';
 import 'package:arber/view/widgets/inputs/main_inputs.dart';
 import 'package:arber/view/widgets/missing_translation.dart';
@@ -58,34 +59,7 @@ class MainScreen extends StatelessWidget {
             Stack(
               children: [
                 bird(),
-                Tooltip(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: allRoundBorderRadius,
-                    boxShadow: const [
-                      lightShadow,
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(20),
-                  margin: EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
-                  verticalOffset: 0,
-                  textStyle: const TextStyle(color: Colors.black),
-                  message: 'Hi 🐦, this is how to use it.'
-                      '\n\n1. Share .xlsx file across your team'
-                      '\n2. Edit it online in a browser'
-                      '\n3. Download a copy of .xlsx'
-                      '\n4. Choose the file in first input'
-                      '\n5. Choose project l10n directory in the second one'
-                      '\n6. Choose main arb file to match if something is missing in excel'
-                      '\n7. Click refresh on the left to see any missing translations'
-                      '\n8. Click create translations to put new .arb files to your project'
-                      '\n9. Only en, de, es are currently supported'
-                      '\n\n Thanks for using ❤️',
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.15,
-                    width: MediaQuery.of(context).size.height * 0.16,
-                  ),
-                ),
+                const Description(),
               ],
             ),
           ],

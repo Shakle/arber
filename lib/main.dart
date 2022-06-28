@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:arber/application.dart';
+import 'package:arber/data/constants.dart';
 import 'package:arber/services/storage_service.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -11,6 +13,7 @@ void main() async {
   await windowManager.ensureInitialized();
 
   StorageService.sharedPrefs = await SharedPreferences.getInstance();
+  packageInfo = await PackageInfo.fromPlatform();
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     WindowOptions windowOptions = const WindowOptions(

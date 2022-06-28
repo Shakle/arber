@@ -176,16 +176,19 @@ code_sign_if_enabled() {
 }
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/screen_retriever/screen_retriever.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/shared_preferences_macos/shared_preferences_macos.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/window_size/window_size.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/window_manager/window_manager.framework"
 fi
 if [[ "$CONFIGURATION" == "Profile" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/screen_retriever/screen_retriever.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/shared_preferences_macos/shared_preferences_macos.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/window_size/window_size.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/window_manager/window_manager.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/screen_retriever/screen_retriever.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/shared_preferences_macos/shared_preferences_macos.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/window_size/window_size.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/window_manager/window_manager.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

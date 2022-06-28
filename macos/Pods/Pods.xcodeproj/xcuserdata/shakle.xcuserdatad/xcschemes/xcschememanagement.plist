@@ -14,12 +14,17 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>screen_retriever.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>shared_preferences_macos.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>window_size.xcscheme</key>
+		<key>window_manager.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>

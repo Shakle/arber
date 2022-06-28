@@ -79,34 +79,8 @@ class MissingTranslationWindow extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 children: [
-                  if (state.arbData.missingKeys.isNotEmpty)
-                    missingTranslationKeysTitle(),
-                  if (state.arbData.missingKeys.isNotEmpty)
-                    const SizedBox(height: 15),
-                  if (state.arbData.missingKeys.isNotEmpty)
-                    ...List.generate(state.arbData.missingKeys.length,
-                          (index) =>
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: SelectableText(
-                              state.arbData.missingKeys[index],
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                          )),
-                  if (state.arbData.missingKeys.isNotEmpty)
-                    const SizedBox(height: 15),
-                  if (state.arbData.missingTranslations.isNotEmpty)
-                    missingTranslationsTitle(),
-                  if (state.arbData.missingTranslations.isNotEmpty)
-                    const SizedBox(height: 15),
-                  if (state.arbData.missingTranslations.isNotEmpty)
-                    ...List.generate(state.arbData.missingTranslations.length,
-                            (index) => Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: missingTranslation(
-                                  state.arbData.missingTranslations[index],
-                              ),
-                            )),
+                  ...keysMissingWidgets(state),
+                  ...translationsMissingWidgets(state),
                 ],
               ),
             );
@@ -129,6 +103,44 @@ class MissingTranslationWindow extends StatelessWidget {
         return translationsAreNotChecked();
       },
     );
+  }
+
+  List<Widget> keysMissingWidgets(TranslationDone state) {
+    return [
+      if (state.arbData.missingKeys.isNotEmpty)
+        missingTranslationKeysTitle(),
+      if (state.arbData.missingKeys.isNotEmpty)
+        const SizedBox(height: 20),
+      if (state.arbData.missingKeys.isNotEmpty)
+        ...List.generate(state.arbData.missingKeys.length,
+                (index) =>
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: SelectableText(
+                    state.arbData.missingKeys[index],
+                    style: const TextStyle(color: Colors.black87),
+                  ),
+                )),
+      if (state.arbData.missingKeys.isNotEmpty)
+        const SizedBox(height: 15),
+    ];
+  }
+
+  List<Widget> translationsMissingWidgets(TranslationDone state) {
+    return [
+      if (state.arbData.missingTranslations.isNotEmpty)
+        missingTranslationsTitle(),
+      if (state.arbData.missingTranslations.isNotEmpty)
+        const SizedBox(height: 20),
+      if (state.arbData.missingTranslations.isNotEmpty)
+        ...List.generate(state.arbData.missingTranslations.length,
+                (index) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: missingTranslation(
+                state.arbData.missingTranslations[index],
+              ),
+            )),
+    ];
   }
 
   Widget missingTranslation(MissingTranslation missingTranslation) {

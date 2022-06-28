@@ -1,2 +1,3 @@
+${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/screen_retriever.framework
 ${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/shared_preferences_macos.framework
-${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/window_size.framework
+${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/window_manager.framework

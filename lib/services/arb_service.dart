@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:arber/data/constants.dart';
 import 'package:arber/data/models/arb.dart';
 import 'package:arber/data/models/arb_data.dart';
 import 'package:arber/data/models/missing_translation.dart';
@@ -43,9 +44,10 @@ class ArbService {
 
         for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
           String value = sheet.rows[i][c]?.value.toString() ?? '';
+          String lang = sheet.rows[0][c]?.value;
 
-          if (value.isEmpty) {
-            translationKeys.add(sheet.rows[0][c]?.value);
+          if (value.isEmpty && allowedTranslations.contains(lang)) {
+            translationKeys.add(lang);
           }
         }
 

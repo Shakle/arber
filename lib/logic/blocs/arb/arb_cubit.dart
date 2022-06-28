@@ -1,3 +1,4 @@
+import 'package:arber/data/constants.dart';
 import 'package:arber/data/models/arb.dart';
 import 'package:arber/services/arb_service.dart';
 import 'package:arber/services/file_service.dart';
@@ -28,6 +29,8 @@ class ArbCubit extends Cubit<ArbState> {
         _arbService.getArbs,
         param: excelPath,
       );
+
+      arbs.removeWhere((arb) => !allowedTranslations.contains(arb.locale));
 
       await _fileService.writeArbFiles(l10nPath, arbs);
       emit(ArbDone());

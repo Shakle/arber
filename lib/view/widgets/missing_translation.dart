@@ -1,3 +1,4 @@
+import 'package:arber/data/models/missing_translation.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
 import 'package:arber/logic/blocs/translation/translation_cubit.dart';
 import 'package:arber/theme/borders.dart';
@@ -71,24 +72,41 @@ class MissingTranslationWindow extends StatelessWidget {
         }
 
         if (state is TranslationDone) {
-          if (state.arbData.missingKeys.isNotEmpty) {
+          if (state.arbData.missingKeys.isNotEmpty
+              || state.arbData.missingTranslations.isNotEmpty) {
             return Padding(
               padding: const EdgeInsets.only(top: 20),
-              child: Column(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
                 children: [
-                  missingTranslationsTitle(),
-                  const SizedBox(height: 15),
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 40),
-                      children: List.generate(state.arbData.missingKeys.length,
-                            (index) =>
-                            SelectableText(
+                  if (state.arbData.missingKeys.isNotEmpty)
+                    missingTranslationKeysTitle(),
+                  if (state.arbData.missingKeys.isNotEmpty)
+                    const SizedBox(height: 15),
+                  if (state.arbData.missingKeys.isNotEmpty)
+                    ...List.generate(state.arbData.missingKeys.length,
+                          (index) =>
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: SelectableText(
                               state.arbData.missingKeys[index],
+                              style: const TextStyle(color: Colors.black87),
                             ),
-                      ),
-                    ),
-                  ),
+                          )),
+                  if (state.arbData.missingKeys.isNotEmpty)
+                    const SizedBox(height: 15),
+                  if (state.arbData.missingTranslations.isNotEmpty)
+                    missingTranslationsTitle(),
+                  if (state.arbData.missingTranslations.isNotEmpty)
+                    const SizedBox(height: 15),
+                  if (state.arbData.missingTranslations.isNotEmpty)
+                    ...List.generate(state.arbData.missingTranslations.length,
+                            (index) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: missingTranslation(
+                                  state.arbData.missingTranslations[index],
+                              ),
+                            )),
                 ],
               ),
             );
@@ -113,6 +131,37 @@ class MissingTranslationWindow extends StatelessWidget {
     );
   }
 
+  Widget missingTranslation(MissingTranslation missingTranslation) {
+    return RichText(
+      text: TextSpan(
+          style: const TextStyle(color: Colors.black87),
+          children: <TextSpan>[
+            TextSpan(text: missingTranslation.key,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const TextSpan(
+              text: ' - ',
+            ),
+            ...List.generate(missingTranslation.missingTranslations.length,
+                  (index) {
+              if (missingTranslation.missingTranslations[index]
+                  == missingTranslation.missingTranslations.last) {
+                return TextSpan(
+                  text: '${missingTranslation.missingTranslations[index]}.',
+                  style: const TextStyle(color: Colors.black54),
+                );
+              } else {
+                return TextSpan(
+                  text: '${missingTranslation.missingTranslations[index]}, ',
+                  style: const TextStyle(color: Colors.black54),
+                );
+              }},
+            ),
+          ],
+      ),
+    );
+  }
+
   Widget errorTranslationsText(String text) {
     return SelectableText(
       text,
@@ -120,13 +169,21 @@ class MissingTranslationWindow extends StatelessWidget {
     );
   }
 
-  Widget missingTranslationsTitle() {
+  Widget missingTranslationKeysTitle() {
     return const Text(
-      'Missing translations in Excel file:',
+      'Missing keys in Excel:',
       textAlign: TextAlign.center,
       style: TextStyle(fontWeight: FontWeight.w600),
     );
   }
+  Widget missingTranslationsTitle() {
+    return const Text(
+      'Missing translations in Excel:',
+      textAlign: TextAlign.center,
+      style: TextStyle(fontWeight: FontWeight.w600),
+    );
+  }
+
 
   Widget translationsAreNotChecked() {
     return const Center(

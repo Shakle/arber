@@ -3,23 +3,79 @@ import 'dart:typed_data';
 
 import 'package:arber/data/models/arb.dart';
 import 'package:arber/data/models/arb_data.dart';
+import 'package:arber/data/models/missing_translation.dart';
 import 'package:arber/data/models/translation.dart';
 import 'package:excel/excel.dart';
 
 class ArbService {
 
+  final int firstTranslationIndex = 2;
+
   ArbData getArbExcelDifference(List<String> paths) {
     Sheet? sheet = _getExcelSheet(paths[0]);
-
-    List<String> excelTranslationKeys = [];
-    List<String> arbTranslationKeys = [];
-
-    File file = File(paths[1]);
-    List<String> arbLines = file.readAsLinesSync();
 
     if (sheet == null) {
       throw Exception('Excel file can\'t be read');
     }
+
+    return ArbData(
+        missingKeys: _getArbTranslationKeys(paths[1])
+            .where((key) => !_getExcelTranslationKeys(sheet).contains(key))
+            .toList(),
+        missingTranslations: _getMissingTranslations(sheet),
+    );
+  }
+
+  List<MissingTranslation> _getMissingTranslations(Sheet sheet) {
+    List<MissingTranslation> missingTranslations = [];
+
+    // Walk through rows
+    for (int i = 1; i < sheet.rows.length; i++) {
+      String? key = sheet.rows[i].first?.value;
+
+      if (key != null) {
+        List<String> translationKeys = [];
+
+        for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
+          String value = sheet.rows[i][c]?.value.toString() ?? '';
+
+          if (value.isEmpty) {
+            translationKeys.add(sheet.rows[0][c]?.value);
+          }
+        }
+
+        if (translationKeys.isNotEmpty) {
+          missingTranslations.add(
+            MissingTranslation(
+              key: key,
+              missingTranslations: translationKeys,
+            ),
+          );
+        }
+      }
+    }
+
+    return missingTranslations;
+  }
+
+  List<String> _getExcelTranslationKeys(Sheet sheet) {
+    List<String> excelTranslationKeys = [];
+
+    for (int i = 1; i < sheet.rows.length; i++) {
+      String? key = sheet.rows[i].first?.value;
+      if (key != null) {
+        excelTranslationKeys.add(key);
+      }
+    }
+
+    return excelTranslationKeys;
+  }
+
+  List<String> _getArbTranslationKeys(String arbFilePath) {
+    List<String> arbTranslationKeys = [];
+
+    File arbFile = File(arbFilePath);
+    List<String> arbLines = arbFile.readAsLinesSync();
 
     arbLines.removeWhere((r) {
       bool isStartOrEnd = r.contains('{') || r.contains('}');
@@ -34,23 +90,11 @@ class ArbService {
       arbTranslationKeys.add(key);
     }
 
-    for (int i = 1; i < sheet.rows.length; i++) {
-      String? key = sheet.rows[i].first?.value;
-      if (key != null) {
-        excelTranslationKeys.add(key);
-      }
-    }
-
-    return ArbData(
-        missingKeys: arbTranslationKeys
-            .where((key) => !excelTranslationKeys.contains(key))
-            .toList()
-        );
+    return arbTranslationKeys;
   }
 
   List<Arb> getArbs(String excelPath) {
     Sheet? sheet = _getExcelSheet(excelPath);
-    int firstTranslationIndex = 2;
 
     List<Arb> arbs = [];
 

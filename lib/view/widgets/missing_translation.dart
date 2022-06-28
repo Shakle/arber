@@ -157,7 +157,7 @@ class MissingTranslationWindow extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Text(
-          'No missing translations, all fine',
+          'Everything is translated, all fine',
           textAlign: TextAlign.center,
         ),
       ),

@@ -19,6 +19,7 @@ class Application extends StatelessWidget {
           BlocProvider<PathCubit>(create: (context) => PathCubit()),
           BlocProvider<ArbCubit>(create: (context) => ArbCubit()),
           BlocProvider<TranslationCubit>(create: (context) => TranslationCubit(
+            arbCubit: context.read<ArbCubit>(),
             pathCubit: context.read<PathCubit>(),
           )),
         ],

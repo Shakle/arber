@@ -8,6 +8,7 @@ import 'package:arber/view/widgets/basf_logo.dart';
 import 'package:arber/view/widgets/buttons/generate_button.dart';
 import 'package:arber/view/widgets/inputs/arb_input.dart';
 import 'package:arber/view/widgets/inputs/main_inputs.dart';
+import 'package:arber/view/widgets/missing_translation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,56 +29,58 @@ class MainScreen extends StatelessWidget {
   }
 
   Widget body(BuildContext context) {
-    return Column(
+    return Row(
       children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Expanded(child: leftColumn(context)),
+        SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+        rightColumn(),
+      ],
+    );
+  }
+
+  Widget rightColumn() {
+    return Builder(
+      builder: (context) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const Expanded(
-                flex: 3,
-                child: BasfLogo(),
-            ),
-            const Spacer(),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.08),
             BackgroundField(
               borderRadius: leftRoundBorderRadius,
               child: inputsAndGenerateButton(),
             ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+            BackgroundField(
+              borderRadius: leftRoundBorderRadius,
+              child: const ArbInput(),
+            ),
+            const Spacer(),
+            bird(),
           ],
+        );
+      }
+    );
+  }
+
+  Widget leftColumn(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.18),
+        const Align(
+            alignment: Alignment(-1, 0.6),
+            child: BasfLogo()
         ),
-        const Spacer(),
         Expanded(
-          flex: 2,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BackgroundField(
-                borderRadius: rightRoundBorderRadius,
-                child: const ArbInput(),
-              ),
-              const Spacer(),
-              Expanded(
-                flex: 7,
-                child: BackgroundField(
-                  borderRadius: allRoundBorderRadius,
-                  child: ListView(
-                    children: const [
-                      Center(child: Text('test')),
-                      Center(child: Text('test')),
-                      Center(child: Text('test')),
-                      Center(child: Text('test')),
-                      Center(child: Text('test')),
-                      Center(child: Text('test')),
-                      Center(child: Text('test')),
-                    ],
-                  ),
+          child: Align(
+            alignment: Alignment.center,
+            child: Padding(
+                padding: EdgeInsets.all(
+                    MediaQuery.of(context).size.width * 0.03,
                 ),
-              ),
-              const Spacer(flex: 3,),
-            ],
+                child: const MissingTranslationWindow()
+            ),
           ),
         ),
-        bird(),
       ],
     );
   }

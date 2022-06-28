@@ -1,5 +1,6 @@
 import 'package:arber/logic/blocs/arb/arb_cubit.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
+import 'package:arber/logic/blocs/translation/translation_cubit.dart';
 import 'package:arber/theme/theme.dart';
 import 'package:arber/view/screens/main_screen.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,9 @@ class Application extends StatelessWidget {
         providers: [
           BlocProvider<PathCubit>(create: (context) => PathCubit()),
           BlocProvider<ArbCubit>(create: (context) => ArbCubit()),
+          BlocProvider<TranslationCubit>(create: (context) => TranslationCubit(
+            pathCubit: context.read<PathCubit>(),
+          )),
         ],
         child: const MainScreen(),
       ),

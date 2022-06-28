@@ -8,7 +8,6 @@ class BasfLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 120,
-      width: 120,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.only(
               bottomRight:  Radius.circular(15),

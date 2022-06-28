@@ -6,10 +6,12 @@ class BackgroundField extends StatelessWidget {
     super.key,
     required this.borderRadius,
     required this.child,
+    this.padding = const EdgeInsets.all(40),
   });
 
   final Widget child;
   final BorderRadius borderRadius;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class BackgroundField extends StatelessWidget {
         borderRadius: borderRadius,
           color: Colors.white,
           child: Padding(
-            padding: const EdgeInsets.all(40),
+            padding: padding,
             child: child,
           ),
       ),

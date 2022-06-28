@@ -1567,13 +1567,14 @@
 /Users/shakle/Development/flutter/packages/flutter_tools/lib/src/build_system/targets/common.dart
 /Users/shakle/Development/flutter/packages/flutter_tools/lib/src/build_system/targets/icon_tree_shaker.dart
 /Users/shakle/Development/flutter/packages/flutter_tools/lib/src/build_system/targets/macos.dart
-/Users/shakle/Development/flutter_projects/arber/DOES_NOT_EXIST_RERUN_FOR_WILDCARD424696933
+/Users/shakle/Development/flutter_projects/arber/DOES_NOT_EXIST_RERUN_FOR_WILDCARD451074987
 /Users/shakle/Development/flutter_projects/arber/assets/animations/dash.riv
 /Users/shakle/Development/flutter_projects/arber/assets/animations/success_icon.riv
 /Users/shakle/Development/flutter_projects/arber/assets/images/basf_logo.png
 /Users/shakle/Development/flutter_projects/arber/lib/application.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/enums.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/models/arb.dart
+/Users/shakle/Development/flutter_projects/arber/lib/data/models/arb_data.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/models/file_exception.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/models/pathway.dart
 /Users/shakle/Development/flutter_projects/arber/lib/data/models/translation.dart
@@ -1581,6 +1582,8 @@
 /Users/shakle/Development/flutter_projects/arber/lib/logic/blocs/arb/arb_state.dart
 /Users/shakle/Development/flutter_projects/arber/lib/logic/blocs/path/path_cubit.dart
 /Users/shakle/Development/flutter_projects/arber/lib/logic/blocs/path/path_state.dart
+/Users/shakle/Development/flutter_projects/arber/lib/logic/blocs/translation/translation_cubit.dart
+/Users/shakle/Development/flutter_projects/arber/lib/logic/blocs/translation/translation_state.dart
 /Users/shakle/Development/flutter_projects/arber/lib/main.dart
 /Users/shakle/Development/flutter_projects/arber/lib/services/arb_service.dart
 /Users/shakle/Development/flutter_projects/arber/lib/services/file_service.dart
@@ -1599,4 +1602,5 @@
 /Users/shakle/Development/flutter_projects/arber/lib/view/widgets/inputs/input_row.dart
 /Users/shakle/Development/flutter_projects/arber/lib/view/widgets/inputs/main_inputs.dart
 /Users/shakle/Development/flutter_projects/arber/lib/view/widgets/inputs/path_input.dart
+/Users/shakle/Development/flutter_projects/arber/lib/view/widgets/missing_translation.dart
 /Users/shakle/Development/flutter_projects/arber/pubspec.yaml

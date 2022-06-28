@@ -14,7 +14,6 @@ class ArbInput extends StatelessWidget {
     PathCubit pathCubit = context.read<PathCubit>();
 
     return InputRow(
-      isLeft: false,
       input: PathInput.mainArbPath(
         controller: pathCubit.arbFilePathController,
       ),

@@ -18,9 +18,11 @@ class ArbService {
       throw Exception('Excel file can\'t be read');
     }
 
+    List<String> excelTranslationKeys = _getExcelTranslationKeys(sheet);
+
     return ArbData(
         missingKeys: _getArbTranslationKeys(paths[1])
-            .where((key) => !_getExcelTranslationKeys(sheet).contains(key))
+            .where((key) => !excelTranslationKeys.contains(key))
             .toList(),
         missingTranslations: _getMissingTranslations(sheet),
     );

@@ -253,6 +253,7 @@ class MissingTranslationWindow extends StatelessWidget {
         height: 17,
         width: 17,
         child: CircularProgressIndicator(
+          strokeWidth: 3,
           color: smoothBlue,
         ),
       ),

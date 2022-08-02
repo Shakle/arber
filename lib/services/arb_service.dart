@@ -102,7 +102,6 @@ class ArbService {
 
   List<Arb> getArbs(String excelPath) {
     Sheet? sheet = _getExcelSheet(excelPath);
-
     List<Arb> arbs = [];
 
     if (sheet != null) {
@@ -115,7 +114,7 @@ class ArbService {
 
         // Walk through columns
         for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
-          Translation translation = _getTranslation(
+          Translation translation = Translation(
             key: key,
             translation: sheet.rows[i][c]?.value.toString() ?? '',
             description: description,
@@ -143,18 +142,6 @@ class ArbService {
     }
 
     return arbs;
-  }
-
-  Translation _getTranslation({
-    required String key,
-    required String translation,
-    String? description,
-  }) {
-    return Translation(
-        key: key,
-        translation: translation,
-        description: description,
-    );
   }
 
   Sheet? _getExcelSheet(String filePath) {

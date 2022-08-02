@@ -14,8 +14,10 @@ class Arb {
     String translationsString = '';
 
     for (Translation translation in translations) {
-      String ts = translation.toJson(translation == translations.last);
-      translationsString += '$ts\n';
+      String? ts = translation.toJson(translation == translations.last);
+      if (ts != null) {
+        translationsString += '$ts\n';
+      }
     }
 
     return '{\n$localeString,\n$translationsString}';

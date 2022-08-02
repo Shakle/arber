@@ -9,11 +9,15 @@ class Translation {
     this.description = '',
   });
 
-  String toJson(bool isLast) {
+  String? toJson(bool isLast) {
     String translationRow = '"$key": "$translation"';
     String descriptionRow = '"@$key": {\n"description": "$description"\n}';
     String coma = isLast ? '' : ',';
 
-    return '$translationRow,\n$descriptionRow$coma';
+    if (translation.isNotEmpty) {
+      return '$translationRow,\n$descriptionRow$coma';
+    } else {
+      return null;
+    }
   }
 }

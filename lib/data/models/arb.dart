@@ -10,14 +10,14 @@ class Arb {
   });
 
   String toJson() {
-    String localeString = '"@@locale": "$locale"';
+    String localeString = '  "@@locale": "$locale"';
     String translationsString = '';
 
+    translations.removeWhere((t) => t.translation.isEmpty);
+    
     for (Translation translation in translations) {
-      String? ts = translation.toJson(translation == translations.last);
-      if (ts != null) {
-        translationsString += '$ts\n';
-      }
+      String ts = translation.toJson(translation == translations.last);
+      translationsString += '$ts\n';
     }
 
     return '{\n$localeString,\n$translationsString}';

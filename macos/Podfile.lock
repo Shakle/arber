@@ -1,40 +1,47 @@
 PODS:
   - FlutterMacOS (1.0.0)
-  - package_info_plus_macos (0.0.1):
+  - package_info_plus (0.0.1):
+    - FlutterMacOS
+  - rive_common (0.0.1):
     - FlutterMacOS
   - screen_retriever (0.0.1):
     - FlutterMacOS
-  - shared_preferences_macos (0.0.1):
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
     - FlutterMacOS
   - window_manager (0.2.0):
     - FlutterMacOS
 
 DEPENDENCIES:
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - package_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus_macos/macos`)
+  - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
+  - rive_common (from `Flutter/ephemeral/.symlinks/plugins/rive_common/macos`)
   - screen_retriever (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos`)
-  - shared_preferences_macos (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos`)
+  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/macos`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
 EXTERNAL SOURCES:
   FlutterMacOS:
     :path: Flutter/ephemeral
-  package_info_plus_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus_macos/macos
+  package_info_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
+  rive_common:
+    :path: Flutter/ephemeral/.symlinks/plugins/rive_common/macos
   screen_retriever:
     :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos
-  shared_preferences_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos
+  shared_preferences_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/macos
   window_manager:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
-  FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
-  package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
+  rive_common: 643f5c20ccd60c53136ab5c970eccf0d17e010fe
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
-  shared_preferences_macos: a64dc611287ed6cbe28fd1297898db1336975727
+  shared_preferences_foundation: 986fc17f3d3251412d18b0265f9c64113a8c2472
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 
-PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
+PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
 
 COCOAPODS: 1.11.3

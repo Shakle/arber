@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:arber/data/constants.dart';
 import 'package:arber/data/models/arb.dart';
 import 'package:arber/data/models/arb_data.dart';
 import 'package:arber/data/models/missing_translation.dart';
@@ -37,24 +36,24 @@ class ArbService {
 
     // Walk through rows
     for (int i = 1; i < sheet.rows.length; i++) {
-      String? key = sheet.rows[i].first?.value;
+      SharedString key = sheet.rows[i].first?.value;
 
-      if (key != null) {
+      if (key.node.text.isNotEmpty) {
         List<String> translationKeys = [];
 
         for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
           String value = sheet.rows[i][c]?.value.toString() ?? '';
-          String lang = sheet.rows[0][c]?.value;
+          SharedString lang = sheet.rows[0][c]?.value;
 
-          if (value.isEmpty && allowedTranslations.contains(lang)) {
-            translationKeys.add(lang);
+          if (value.isEmpty) {
+            translationKeys.add(lang.node.text);
           }
         }
 
         if (translationKeys.isNotEmpty) {
           missingTranslations.add(
             MissingTranslation(
-              key: key,
+              key: key.node.text,
               missingTranslations: translationKeys,
             ),
           );
@@ -69,9 +68,9 @@ class ArbService {
     List<String> excelTranslationKeys = [];
 
     for (int i = 1; i < sheet.rows.length; i++) {
-      String? key = sheet.rows[i].first?.value;
-      if (key != null) {
-        excelTranslationKeys.add(key);
+      SharedString key = sheet.rows[i].first?.value;
+      if (key.node.text.isNotEmpty) {
+        excelTranslationKeys.add(key.node.text);
       }
     }
 
@@ -109,13 +108,13 @@ class ArbService {
 
       // Walk through rows
       for (int i = 1; i < sheet.rows.length; i++) {
-        String key = sheet.rows[i].first?.value ?? '';
+        SharedString key = sheet.rows[i].first?.value ?? '';
         String description = sheet.rows[i][1]?.value.toString() ?? '';
 
         // Walk through columns
         for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
           Translation translation = Translation(
-            key: key,
+            key: key.node.text,
             translation: sheet.rows[i][c]?.value.toString() ?? '',
             description: description,
           );
@@ -132,10 +131,10 @@ class ArbService {
     List<Arb> arbs = [];
 
     for (int i = firstTranslationIndex; i < sheet.rows.first.length; i++) {
-      String locale = sheet.rows.first[i]?.value;
+      SharedString locale = sheet.rows.first[i]?.value;
       arbs.add(
         Arb(
-          locale: locale,
+          locale: locale.node.text,
           translations: [],
         ),
       );

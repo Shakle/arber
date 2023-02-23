@@ -1,4 +1,3 @@
-import 'package:arber/data/constants.dart';
 import 'package:arber/data/models/arb.dart';
 import 'package:arber/services/arb_service.dart';
 import 'package:arber/services/file_service.dart';
@@ -23,14 +22,12 @@ class ArbCubit extends Cubit<ArbState> {
       emit(ArbGenerating());
 
       computer = Computer.create();
-      await computer.turnOn();
+      computer.turnOn();
 
       List<Arb> arbs = await computer.compute(
-        _arbService.getArbs,
-        param: excelPath,
+          _arbService.getArbs,
+          param: excelPath,
       );
-
-      arbs.removeWhere((arb) => !allowedTranslations.contains(arb.locale));
 
       await _fileService.writeArbFiles(l10nPath, arbs);
       emit(ArbDone());

@@ -28,8 +28,8 @@ class GenerateButton extends StatelessWidget {
             width: 180,
             child: TextButton(
                 style: TextButton.styleFrom(
+                  foregroundColor: isActive ? Colors.white : Colors.grey,
                   backgroundColor: isActive ? smoothBlue : Colors.grey.shade200,
-                  primary: isActive ? Colors.white : Colors.grey,
                   padding: const EdgeInsets.all(20),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

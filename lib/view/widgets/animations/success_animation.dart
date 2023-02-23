@@ -6,13 +6,10 @@ class SuccessAnimationIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Tooltip(
-      message: 'Arb files are already in l10 directory',
-      child: Icon(
-        Icons.check_circle,
-        color: smoothBlue,
-        size: 28,
-      ),
+    return const Icon(
+      Icons.check_circle,
+      color: smoothBlue,
+      size: 28,
     );
   }
 

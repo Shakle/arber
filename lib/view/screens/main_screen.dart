@@ -141,13 +141,10 @@ class MainScreen extends StatelessWidget {
   }
 
   Widget failIcon() {
-    return Tooltip(
-      message: 'Arb generation failed',
-      child: Icon(
-        Icons.close,
-        size: 30,
-        color: Colors.red.shade700,
-      ),
+    return Icon(
+      Icons.close,
+      size: 30,
+      color: Colors.red.shade700,
     );
   }
 }

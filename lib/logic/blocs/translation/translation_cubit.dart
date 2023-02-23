@@ -40,15 +40,13 @@ class TranslationCubit extends Cubit<TranslationState> {
 
   Future<void> checkArbExcelDifference() async {
     late final Computer computer;
-
     try {
       emit(TranslationGenerating());
 
       computer = Computer.create();
-      await computer.turnOn();
+      computer.turnOn();
 
-      ArbData arbData = await computer.compute(
-        _arbService.getArbExcelDifference,
+      ArbData arbData = await computer.compute(_arbService.getArbExcelDifference,
         param: [
           _pathCubit.excelFilePathController.text,
           _pathCubit.arbFilePathController.text,
@@ -59,7 +57,7 @@ class TranslationCubit extends Cubit<TranslationState> {
     } catch (e) {
       emit(TranslationError(errorMessage: e.toString()));
     } finally {
-      await computer.turnOff();
+      computer.turnOff();
     }
   }
 

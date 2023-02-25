@@ -9,6 +9,7 @@ class FilePickerButton extends StatefulWidget {
   FilePickerButton.file({
     super.key,
     required this.controller,
+    required this.tooltipMessage,
     required ArtifactType artifactType,
   }) {
     pickType = PickType.file;
@@ -18,6 +19,7 @@ class FilePickerButton extends StatefulWidget {
   FilePickerButton.directory({
     super.key,
     required this.controller,
+    required this.tooltipMessage,
   }) {
     pickType = PickType.directory;
   }
@@ -25,6 +27,7 @@ class FilePickerButton extends StatefulWidget {
   late final PickType pickType;
   late final ArtifactType? _artifactType;
   final TextEditingController controller;
+  final String tooltipMessage;
 
   @override
   State<FilePickerButton> createState() => _FilePickerButtonState();
@@ -39,11 +42,14 @@ class _FilePickerButtonState extends State<FilePickerButton> {
   }
 
   Widget iconButton(BuildContext context) {
-    return IconButton(
-        onPressed: isLoading
-            ? null
-            : () => onPressed(context.read<PathCubit>()),
-        icon: isLoading ? loader() : fileIcon(),
+    return Tooltip(
+      message: widget.tooltipMessage,
+      child: IconButton(
+          onPressed: isLoading
+              ? null
+              : () => onPressed(context.read<PathCubit>()),
+          icon: isLoading ? loader() : fileIcon(),
+      ),
     );
   }
 

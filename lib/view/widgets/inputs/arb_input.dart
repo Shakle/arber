@@ -19,6 +19,7 @@ class ArbInput extends StatelessWidget {
       ),
       fileButton: FilePickerButton.file(
         controller: pathCubit.arbFilePathController,
+        tooltipMessage: 'Main Arb file',
         artifactType: ArtifactType.mainArb,
       ),
     );

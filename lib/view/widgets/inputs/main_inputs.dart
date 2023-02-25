@@ -26,6 +26,7 @@ class FileInputs extends StatelessWidget {
           ),
           fileButton: FilePickerButton.file(
             controller: pathCubit.excelFilePathController,
+            tooltipMessage: 'Excel file',
             artifactType: ArtifactType.excel,
           ),
         ),
@@ -35,6 +36,7 @@ class FileInputs extends StatelessWidget {
             controller: pathCubit.l10nDirectoryPathController,
           ),
           fileButton: FilePickerButton.directory(
+            tooltipMessage: 'L10n directory',
             controller: pathCubit.l10nDirectoryPathController,
           ),
         ),

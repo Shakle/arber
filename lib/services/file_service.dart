@@ -4,25 +4,24 @@ import 'package:arber/data/models/arb.dart';
 import 'package:file_picker/file_picker.dart';
 
 class FileService {
+  final FilePicker _filePicker = FilePicker.platform;
 
   Future<String?> getFilePath() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
+    FilePickerResult? result = await _filePicker.pickFiles();
     return result?.files.single.path;
   }
 
   Future<String?> getDirectoryPath() async
-    => await FilePicker.platform.getDirectoryPath();
-
+  => await _filePicker.getDirectoryPath();
 
   Future<void> writeArbFiles(String l10nDirectoryPath, List<Arb> arbs) async {
     List<FileSystemEntity> fileSystemEntityList = Directory(l10nDirectoryPath)
-        .listSync();
+        .listSync()
+        .where((file) => file.path.split('.').last.contains('arb'))
+        .toList();
 
     for (FileSystemEntity file in fileSystemEntityList) {
-      if (file.path.split('.').last.contains('arb')) {
-        file.deleteSync();
-      }
+      file.deleteSync();
     }
 
     for (Arb arb in arbs) {
@@ -31,4 +30,5 @@ class FileService {
       file.writeAsStringSync(arb.toJson());
     }
   }
+
 }

@@ -21,12 +21,14 @@ class ArbService {
 
     List<String> excelTranslationKeys = _getExcelTranslationKeys(sheet);
 
+    List<String> missingKeys = [
+      if (arbPath.trim().isNotEmpty)..._getArbTranslationKeys(paths[1])
+          .where((key) => !excelTranslationKeys.contains(key))
+          .toList(),
+    ];
+
     return ArbData(
-        missingKeys: arbPath.isEmpty
-            ? []
-            : _getArbTranslationKeys(paths[1])
-                .where((key) => !excelTranslationKeys.contains(key))
-                .toList(),
+        missingKeys: missingKeys,
         missingTranslations: _getMissingTranslations(sheet),
     );
   }
@@ -34,30 +36,31 @@ class ArbService {
   List<MissingTranslation> _getMissingTranslations(Sheet sheet) {
     List<MissingTranslation> missingTranslations = [];
 
-    // Walk through rows
     for (int i = 1; i < sheet.rows.length; i++) {
       SharedString key = sheet.rows[i].first?.value;
 
-      if (key.node.text.isNotEmpty) {
-        List<String> translationKeys = [];
+      if (key.node.text.trim().isEmpty) {
+        break;
+      }
 
-        for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
-          String value = sheet.rows[i][c]?.value.toString() ?? '';
-          SharedString lang = sheet.rows[0][c]?.value;
+      List<String> translationKeys = [];
 
-          if (value.isEmpty) {
-            translationKeys.add(lang.node.text);
-          }
+      for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
+        String? value = sheet.rows[i][c]?.value.node.text;
+        SharedString lang = sheet.rows[0][c]?.value;
+
+        if (value?.trim().isEmpty ?? true) {
+          translationKeys.add(lang.node.text);
         }
+      }
 
-        if (translationKeys.isNotEmpty) {
-          missingTranslations.add(
-            MissingTranslation(
-              key: key.node.text,
-              missingTranslations: translationKeys,
-            ),
-          );
-        }
+      if (translationKeys.isNotEmpty) {
+        missingTranslations.add(
+          MissingTranslation(
+            key: key.node.text,
+            missingTranslations: translationKeys,
+          ),
+        );
       }
     }
 
@@ -67,10 +70,12 @@ class ArbService {
   List<String> _getExcelTranslationKeys(Sheet sheet) {
     List<String> excelTranslationKeys = [];
 
-    for (int i = 1; i < sheet.rows.length; i++) {
-      SharedString key = sheet.rows[i].first?.value;
-      if (key.node.text.isNotEmpty) {
-        excelTranslationKeys.add(key.node.text);
+    for (List<Data?> data in sheet.rows) {
+      if (data.first != null && data.first!.value is SharedString) {
+        SharedString sharedString = data.first!.value;
+        if (sharedString.node.text.trim().isNotEmpty) {
+          excelTranslationKeys.add(sharedString.node.text);
+        }
       }
     }
 
@@ -108,15 +113,25 @@ class ArbService {
 
       // Walk through rows
       for (int i = 1; i < sheet.rows.length; i++) {
-        SharedString key = sheet.rows[i].first?.value ?? '';
-        String description = sheet.rows[i][1]?.value.toString() ?? '';
+        SharedString key = sheet.rows[i].first?.value;
+        String description = sheet.rows[i][1]?.value.node.text ?? '';
 
         // Walk through columns
         for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
+          SharedString? sharedString = sheet.rows[i][c]?.value;
+
+          if (sharedString == null) {
+            break;
+          }
+          
           Translation translation = Translation(
             key: key.node.text,
-            translation: sheet.rows[i][c]?.value.toString() ?? '',
-            description: description,
+            translation: sharedString.node.text
+                .replaceAll('\r', '')
+                .replaceAll('\n', r'\n'),
+            description: description
+                .replaceAll('\r', '')
+                .replaceAll('\n', r'\n'),
           );
 
           arbs[c - firstTranslationIndex].translations.add(translation);

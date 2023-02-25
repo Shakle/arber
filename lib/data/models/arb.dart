@@ -20,7 +20,9 @@ class Arb {
       translationsString += '$ts\n';
     }
 
-    return '{\n$localeString,\n$translationsString}';
+    return translationsString.isEmpty
+        ? '{\n$localeString\n}'
+        : '{\n$localeString,\n$translationsString}';
   }
 
 }

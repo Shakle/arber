@@ -33,6 +33,7 @@ class ArbCubit extends Cubit<ArbState> {
       emit(ArbDone());
     } catch (e) {
       emit(ArbFailed(e));
+      rethrow;
     } finally {
       await computer.turnOff();
     }

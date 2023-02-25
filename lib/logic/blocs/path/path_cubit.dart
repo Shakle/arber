@@ -32,7 +32,7 @@ class PathCubit extends Cubit<PathState> {
   File get arbFile => File(arbFilePathController.text);
   Directory get l10nDirectory => Directory(l10nDirectoryPathController.text);
 
-  void _pathListener(Timer timer) {
+  Future<void> _pathListener(Timer timer) async {
     bool excelSuccess = excelFilePathController.text.isNotEmpty
         && excelPathValidator() == null;
     bool l10nSuccess = l10nDirectoryPathController.text.isNotEmpty
@@ -40,7 +40,7 @@ class PathCubit extends Cubit<PathState> {
     bool arbSuccess = arbFilePathController.text.isNotEmpty
         && arbPathValidator() == null;
 
-    savePaths(
+    await savePaths(
         excelSuccess: excelSuccess,
         l10nSuccess: l10nSuccess,
         arbSuccess: arbSuccess,
@@ -105,32 +105,26 @@ class PathCubit extends Cubit<PathState> {
     ));
   }
 
-  void savePaths({
+  Future<void> savePaths({
     required bool excelSuccess,
     required bool l10nSuccess,
     required bool arbSuccess,
-  }) {
-    if (excelSuccess) {
-      _storageService.saveExcelPath(excelFilePathController.text);
-    }
-    if (l10nSuccess) {
-      _storageService.saveL10nPath(l10nDirectoryPathController.text);
-    }
-    if (arbSuccess) {
-      _storageService.saveMainArbPath(arbFilePathController.text);
-    }
+  }) async {
+    excelSuccess
+        ? await _storageService.saveExcelPath(excelFilePathController.text)
+        : await _storageService.removeExcelPath();
+    l10nSuccess
+        ? await _storageService.saveL10nPath(l10nDirectoryPathController.text)
+        : await _storageService.removeL10nPath();
+    arbSuccess
+        ? await _storageService.saveMainArbPath(arbFilePathController.text)
+        : await _storageService.removeMainArbPath();
   }
 
   void restorePaths() {
-    Future.wait([
-      _storageService.getExcelPath(),
-      _storageService.getL10nPath(),
-      _storageService.getMainArbPath(),
-    ]).then((value) {
-      excelFilePathController.text = value[0];
-      l10nDirectoryPathController.text = value[1];
-      arbFilePathController.text = value[2];
-    });
+    excelFilePathController.text = _storageService.getExcelPath();
+    l10nDirectoryPathController.text = _storageService.getL10nPath();
+    arbFilePathController.text = _storageService.getMainArbPath();
   }
 
   String? excelPathValidator() {

@@ -9,26 +9,32 @@ class StorageService {
   final String _mainArbPath = 'main_arb_path';
 
   Future<void> saveExcelPath(String path) async {
-    sharedPrefs.setString(_excelPath, path);
+    await sharedPrefs.setString(_excelPath, path);
+  }
+
+  Future<void> removeExcelPath() async {
+    await sharedPrefs.remove(_excelPath);
   }
 
   Future<void> saveL10nPath(String path) async {
-    sharedPrefs.setString(_l10nPath, path);
+    await sharedPrefs.setString(_l10nPath, path);
+  }
+
+  Future<void> removeL10nPath() async {
+    await sharedPrefs.remove(_l10nPath);
   }
 
   Future<void> saveMainArbPath(String path) async {
-    sharedPrefs.setString(_mainArbPath, path);
+    await sharedPrefs.setString(_mainArbPath, path);
   }
 
-  Future<String> getExcelPath() async {
-    return sharedPrefs.getString(_excelPath) ?? '';
+  Future<void> removeMainArbPath() async {
+    await sharedPrefs.remove(_mainArbPath);
   }
 
-  Future<String> getL10nPath() async {
-    return sharedPrefs.getString(_l10nPath) ?? '';
-  }
+  String getExcelPath() => sharedPrefs.getString(_excelPath) ?? '';
 
-  Future<String> getMainArbPath() async {
-    return sharedPrefs.getString(_mainArbPath) ?? '';
-  }
+  String getL10nPath() => sharedPrefs.getString(_l10nPath) ?? '';
+
+  String getMainArbPath() => sharedPrefs.getString(_mainArbPath) ?? '';
 }

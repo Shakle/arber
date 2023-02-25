@@ -46,7 +46,12 @@ class ArbService {
       List<String> translationKeys = [];
 
       for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
-        String? value = sheet.rows[i][c]?.value.node.text;
+        dynamic data = sheet.rows[i][c]?.value;
+
+        String? value = data != null && data is SharedString
+            ? sheet.rows[i][c]?.value.node.text
+            : null;
+
         SharedString lang = sheet.rows[0][c]?.value;
 
         if (value?.trim().isEmpty ?? true) {

@@ -56,7 +56,6 @@ class TranslationCubit extends Cubit<TranslationState> {
       emit(TranslationDone(arbData: arbData));
     } catch (e) {
       emit(TranslationError(errorMessage: e.toString()));
-      rethrow;
     } finally {
       computer.turnOff();
     }

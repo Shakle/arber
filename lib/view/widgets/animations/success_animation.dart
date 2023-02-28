@@ -6,10 +6,13 @@ class SuccessAnimationIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Icon(
-      Icons.check_circle,
-      color: smoothBlue,
-      size: 28,
+    return const Tooltip(
+      message: 'Generated successfully',
+      child: Icon(
+        Icons.check_circle,
+        color: smoothBlue,
+        size: 28,
+      ),
     );
   }
 

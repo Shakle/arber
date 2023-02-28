@@ -3,7 +3,7 @@ description: Arb Excel translator
 
 publish_to: 'none'
 
-version: 1.0.3+4
+version: 1.0.4+5
 
 environment:
   sdk: ">=2.19.2 <3.0.0"
@@ -21,7 +21,7 @@ dependencies:
   flutter_bloc: ^8.1.2
   shared_preferences: ^2.0.18
 
-  window_manager: ^0.3.0
+  window_manager: ^0.3.1
   package_info_plus: ^3.0.3
 
   cupertino_icons: ^1.0.5

@@ -123,15 +123,19 @@ class ArbService {
 
         // Walk through columns
         for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
-          SharedString? sharedString = sheet.rows[i][c]?.value;
+          dynamic value = sheet.rows[i][c]?.value;
 
-          if (sharedString == null) {
+          if (value == null) {
             break;
           }
-          
+
+          String text = value is SharedString
+              ? value.node.text
+              : value.toString();
+
           Translation translation = Translation(
             key: key.node.text,
-            translation: sharedString.node.text
+            translation: text
                 .replaceAll('\r', '')
                 .replaceAll('\n', r'\n'),
             description: description

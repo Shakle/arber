@@ -118,19 +118,15 @@ class MainScreen extends StatelessWidget {
         builder: (context, state) {
           return Row(
             children: [
-              Stack(
-                children: [
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 250),
-                    opacity: state is ArbDone ? 1 : 0,
-                    child: const SuccessAnimationIcon(),
-                  ),
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 250),
-                    opacity: state is ArbFailed ? 1 : 0,
-                    child: failIcon(),
-                  ),
-                ],
+              AnimatedOpacity(
+                opacity: state is ArbDone || state is ArbFailed ? 1 : 0,
+                duration: const Duration(milliseconds: 250),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: state is ArbDone ? const SuccessAnimationIcon()
+                      : state is ArbFailed ? failIcon(state)
+                      : const SizedBox(),
+                ),
               ),
               const SizedBox(width: 10),
               const GenerateButton(),
@@ -140,11 +136,14 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  Widget failIcon() {
-    return Icon(
-      Icons.close,
-      size: 30,
-      color: Colors.red.shade700,
+  Widget failIcon(ArbFailed arbFailed) {
+    return Tooltip(
+      message: arbFailed.exception.toString(),
+      child: Icon(
+        Icons.close,
+        size: 30,
+        color: Colors.red.shade700,
+      ),
     );
   }
 }

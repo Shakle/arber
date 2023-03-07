@@ -40,7 +40,7 @@ class ArbService {
       SharedString key = sheet.rows[i].first?.value;
 
       if (key.node.text.trim().isEmpty) {
-        break;
+        continue;
       }
 
       List<String> translationKeys = [];
@@ -125,8 +125,8 @@ class ArbService {
         for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
           dynamic value = sheet.rows[i][c]?.value;
 
-          if (value == null) {
-            break;
+          if (value == null || value.toString().trim().isEmpty) {
+            continue;
           }
 
           String text = value is SharedString

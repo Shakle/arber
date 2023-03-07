@@ -3,10 +3,10 @@ description: Arb Excel translator
 
 publish_to: 'none'
 
-version: 1.0.4+5
+version: 1.0.5+6
 
 environment:
-  sdk: ">=2.19.2 <3.0.0"
+  sdk: ">=2.19.3 <3.0.0"
 
 dependencies:
   flutter:

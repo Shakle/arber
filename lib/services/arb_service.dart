@@ -37,9 +37,9 @@ class ArbService {
     List<MissingTranslation> missingTranslations = [];
 
     for (int i = 1; i < sheet.rows.length; i++) {
-      SharedString key = sheet.rows[i].first?.value;
+      SharedString? key = sheet.rows[i].first?.value;
 
-      if (key.node.text.trim().isEmpty) {
+      if (key == null || key.node.text.trim().isEmpty) {
         continue;
       }
 
@@ -118,7 +118,12 @@ class ArbService {
 
       // Walk through rows
       for (int i = 1; i < sheet.rows.length; i++) {
-        SharedString key = sheet.rows[i].first?.value;
+        SharedString? key = sheet.rows[i].first?.value;
+
+        if (key == null) {
+          continue;
+        }
+
         String description = sheet.rows[i][1]?.value.node.text ?? '';
 
         // Walk through columns

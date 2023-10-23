@@ -22,9 +22,9 @@ class ArbService {
     List<String> excelTranslationKeys = _getExcelTranslationKeys(sheet);
 
     List<String> missingKeys = [
-      if (arbPath.trim().isNotEmpty)..._getArbTranslationKeys(paths[1])
-          .where((key) => !excelTranslationKeys.contains(key))
-          .toList(),
+      if (arbPath.trim().isNotEmpty)
+        ..._getArbTranslationKeys(paths[1])
+          .where((key) => !excelTranslationKeys.contains(key)),
     ];
 
     return ArbData(

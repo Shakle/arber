@@ -16,11 +16,13 @@ void main() async {
   packageInfo = await PackageInfo.fromPlatform();
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    WindowOptions windowOptions = const WindowOptions(
-      minimumSize: Size(1000, 700),
-      size: Size(1050, 750),
+    WindowOptions windowOptions = WindowOptions(
+      minimumSize: const Size(1000, 700),
+      size: const Size(1050, 750),
       backgroundColor: Colors.transparent,
-      titleBarStyle: TitleBarStyle.hidden,
+      titleBarStyle: Platform.isMacOS
+          ? TitleBarStyle.hidden
+          : TitleBarStyle.normal,
     );
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {

@@ -8,7 +8,6 @@ import 'package:arber/data/models/translation.dart';
 import 'package:excel/excel.dart';
 
 class ArbService {
-
   final int firstTranslationIndex = 2;
 
   ArbData getArbExcelDifference(List<String> paths) {
@@ -23,13 +22,14 @@ class ArbService {
 
     List<String> missingKeys = [
       if (arbPath.trim().isNotEmpty)
-        ..._getArbTranslationKeys(paths[1])
-          .where((key) => !excelTranslationKeys.contains(key)),
+        ..._getArbTranslationKeys(
+          paths[1],
+        ).where((key) => !excelTranslationKeys.contains(key)),
     ];
 
     return ArbData(
-        missingKeys: missingKeys,
-        missingTranslations: _getMissingTranslations(sheet),
+      missingKeys: missingKeys,
+      missingTranslations: _getMissingTranslations(sheet),
     );
   }
 
@@ -134,18 +134,17 @@ class ArbService {
             continue;
           }
 
-          String text = value is SharedString
-              ? value.node.text
-              : value.toString();
+          String text =
+              value is SharedString ? value.node.text : value.toString();
+
+          List<String> placeholders = _extractPlaceholders(text);
 
           Translation translation = Translation(
             key: key.node.text,
-            translation: text
-                .replaceAll('\r', '')
-                .replaceAll('\n', r'\n'),
-            description: description
-                .replaceAll('\r', '')
-                .replaceAll('\n', r'\n'),
+            translation: text.replaceAll('\r', '').replaceAll('\n', r'\n'),
+            description:
+                description.replaceAll('\r', '').replaceAll('\n', r'\n'),
+            placeholders: placeholders,
           );
 
           arbs[c - firstTranslationIndex].translations.add(translation);
@@ -156,17 +155,18 @@ class ArbService {
     return arbs;
   }
 
+  List<String> _extractPlaceholders(String text) {
+    RegExp exp = RegExp(r'\{(\w+)\}');
+    Iterable<RegExpMatch> matches = exp.allMatches(text);
+    return matches.map((m) => m.group(1)!).toList();
+  }
+
   List<Arb> _createEmptyArbs(Sheet sheet, int firstTranslationIndex) {
     List<Arb> arbs = [];
 
     for (int i = firstTranslationIndex; i < sheet.rows.first.length; i++) {
       SharedString locale = sheet.rows.first[i]?.value;
-      arbs.add(
-        Arb(
-          locale: locale.node.text,
-          translations: [],
-        ),
-      );
+      arbs.add(Arb(locale: locale.node.text, translations: []));
     }
 
     return arbs;

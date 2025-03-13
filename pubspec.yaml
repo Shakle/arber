@@ -3,32 +3,32 @@ description: Arb Excel translator
 
 publish_to: 'none'
 
-version: 1.0.9+10
+version: 1.0.10+11
 
 environment:
-  sdk: ">=3.4.4 <4.0.0"
+  sdk: ^3.7.0
 
 dependencies:
   flutter:
     sdk: flutter
 
-  rive: ^0.13.10
+  rive: ^0.13.20
 
-  file_picker: ^8.0.6
-  excel: ^2.1.0
+  file_picker: ^9.0.3
+  excel: ^3.0.0
   computer: ^3.2.1
 
-  flutter_bloc: ^8.1.6
-  shared_preferences: ^2.2.3
+  flutter_bloc: ^9.1.0
+  shared_preferences: ^2.5.2
 
-  window_manager: ^0.3.9
-  package_info_plus: ^8.0.0
+  window_manager: ^0.4.3
+  package_info_plus: ^8.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true

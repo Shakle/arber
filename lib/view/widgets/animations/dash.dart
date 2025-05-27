@@ -1,3 +1,4 @@
+import 'package:arber/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
@@ -9,9 +10,7 @@ class DashAnimation extends StatelessWidget {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.16,
       width: MediaQuery.of(context).size.height * 0.16,
-      child: const RiveAnimation.asset(
-        'assets/animations/dash.riv',
-      ),
+      child: RiveAnimation.asset(Assets.animations.dash.path),
     );
   }
 }

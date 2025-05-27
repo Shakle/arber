@@ -22,7 +22,7 @@ class ArbCubit extends Cubit<ArbState> {
       emit(ArbGenerating());
 
       computer = Computer.create();
-      computer.turnOn();
+      await computer.turnOn();
 
       List<Arb> arbs = await computer.compute(
           _arbService.getArbs,

@@ -91,9 +91,7 @@ class ArbService {
     List<String> arbTranslationKeys = [];
 
     File arbFile = File(arbFilePath);
-    List<String> arbLines = arbFile.readAsLinesSync();
-
-    arbLines.removeWhere((r) {
+    List<String> arbLines = arbFile.readAsLinesSync()..removeWhere((r) {
       bool isStartOrEnd = r.contains('{') || r.contains('}');
       bool isLocale = r.contains('@@');
       bool isDescription = r.contains('"description"');

@@ -44,7 +44,7 @@ class TranslationCubit extends Cubit<TranslationState> {
       emit(TranslationGenerating());
 
       computer = Computer.create();
-      computer.turnOn();
+      await computer.turnOn();
 
       ArbData arbData = await computer.compute(_arbService.getArbExcelDifference,
         param: [
@@ -57,7 +57,7 @@ class TranslationCubit extends Cubit<TranslationState> {
     } catch (e) {
       emit(TranslationError(errorMessage: e.toString()));
     } finally {
-      computer.turnOff();
+      await computer.turnOff();
     }
   }
 

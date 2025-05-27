@@ -24,5 +24,4 @@ class Arb {
         ? '{\n$localeString\n}'
         : '{\n$localeString,\n$translationsString}';
   }
-
 }

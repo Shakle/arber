@@ -78,12 +78,9 @@ class MainScreen extends StatelessWidget {
         ),
         Expanded(
           child: Align(
-            alignment: Alignment.center,
             child: Padding(
-                padding: EdgeInsets.all(
-                    MediaQuery.of(context).size.width * 0.03,
-                ),
-                child: const MissingTranslationWindow()
+              padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.03),
+              child: const MissingTranslationWindow()
             ),
           ),
         ),

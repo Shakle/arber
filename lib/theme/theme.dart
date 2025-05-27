@@ -7,6 +7,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorSchemeSeed: smoothBlue,
+      scaffoldBackgroundColor: Colors.white,
       inputDecorationTheme: _inputDecorationTheme,
     );
   }
@@ -34,5 +35,4 @@ class AppTheme {
 
   static TextStyle get inputTextStyle => const TextStyle(color: Colors.black54);
   static TextStyle get _hintTextStyle => const TextStyle(color: Colors.black45);
-
 }

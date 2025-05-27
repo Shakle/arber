@@ -30,5 +30,4 @@ class FileService {
       file.writeAsStringSync(arb.toJson());
     }
   }
-
 }

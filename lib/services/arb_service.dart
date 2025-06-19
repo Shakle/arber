@@ -1,31 +1,29 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:excel/excel.dart';
 import 'package:arber/data/models/arb.dart';
 import 'package:arber/data/models/arb_data.dart';
 import 'package:arber/data/models/missing_translation.dart';
 import 'package:arber/data/models/translation.dart';
-import 'package:excel/excel.dart';
 
 class ArbService {
   final int firstTranslationIndex = 2;
 
   ArbData getArbExcelDifference(List<String> paths) {
-    Sheet? sheet = _getExcelSheet(paths[0]);
-    String arbPath = paths[1];
+    final Sheet? sheet = _getExcelSheet(paths[0]);
+    final String arbPath = paths[1].trim();
 
     if (sheet == null) {
       throw Exception('Excel file can\'t be read');
     }
 
-    List<String> excelTranslationKeys = _getExcelTranslationKeys(sheet);
-
-    List<String> missingKeys = [
-      if (arbPath.trim().isNotEmpty)
-        ..._getArbTranslationKeys(
-          paths[1],
-        ).where((key) => !excelTranslationKeys.contains(key)),
-    ];
+    final excelTranslationKeys = _getExcelTranslationKeys(sheet);
+    final List<String> missingKeys = arbPath.isNotEmpty
+        ? _getArbTranslationKeys(arbPath)
+        .where((k) => !excelTranslationKeys.contains(k))
+        .toList()
+        : <String>[];
 
     return ArbData(
       missingKeys: missingKeys,
@@ -34,36 +32,27 @@ class ArbService {
   }
 
   List<MissingTranslation> _getMissingTranslations(Sheet sheet) {
-    List<MissingTranslation> missingTranslations = [];
+    final List<MissingTranslation> missingTranslations = [];
 
-    for (int i = 1; i < sheet.rows.length; i++) {
-      SharedString? key = sheet.rows[i].first?.value;
+    // Skip header row
+    for (var row in sheet.rows.skip(1)) {
+      final String? keyText = _cellValueToString(row.first?.value);
+      if (keyText?.trim().isEmpty ?? true) continue;
 
-      if (key == null || key.node.text.trim().isEmpty) {
-        continue;
-      }
-
-      List<String> translationKeys = [];
-
-      for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
-        dynamic data = sheet.rows[i][c]?.value;
-
-        String? value = data != null && data is SharedString
-            ? sheet.rows[i][c]?.value.node.text
-            : null;
-
-        SharedString lang = sheet.rows[0][c]?.value;
-
-        if (value?.trim().isEmpty ?? true) {
-          translationKeys.add(lang.node.text);
+      final List<String> localesMissing = [];
+      for (var c = firstTranslationIndex; c < row.length; c++) {
+        final String? cellText = _cellValueToString(row[c]?.value);
+        if (cellText?.trim().isEmpty ?? true) {
+          final String? locale = _cellValueToString(sheet.rows[0][c]?.value);
+          if (locale != null) localesMissing.add(locale);
         }
       }
 
-      if (translationKeys.isNotEmpty) {
+      if (localesMissing.isNotEmpty) {
         missingTranslations.add(
           MissingTranslation(
-            key: key.node.text,
-            missingTranslations: translationKeys,
+            key: keyText!,
+            missingTranslations: localesMissing,
           ),
         );
       }
@@ -73,34 +62,26 @@ class ArbService {
   }
 
   List<String> _getExcelTranslationKeys(Sheet sheet) {
-    List<String> excelTranslationKeys = [];
-
-    for (List<Data?> data in sheet.rows) {
-      if (data.first != null && data.first!.value is SharedString) {
-        SharedString sharedString = data.first!.value;
-        if (sharedString.node.text.trim().isNotEmpty) {
-          excelTranslationKeys.add(sharedString.node.text);
-        }
-      }
-    }
-
-    return excelTranslationKeys;
+    return sheet.rows
+        .map((row) => _cellValueToString(row.first?.value))
+        .where((key) => key != null && key.trim().isNotEmpty)
+        .cast<String>()
+        .toList();
   }
 
   List<String> _getArbTranslationKeys(String arbFilePath) {
-    List<String> arbTranslationKeys = [];
+    final List<String> arbTranslationKeys = [];
 
-    File arbFile = File(arbFilePath);
-    List<String> arbLines = arbFile.readAsLinesSync()..removeWhere((r) {
-      bool isStartOrEnd = r.contains('{') || r.contains('}');
-      bool isLocale = r.contains('@@');
-      bool isDescription = r.contains('"description"');
+    final File arbFile = File(arbFilePath);
+    final List<String> arbLines = arbFile
+        .readAsLinesSync()
+      ..removeWhere((r) {
+        return r.contains('{') || r.contains('}') ||
+            r.contains('@@')   || r.contains('"description"');
+      });
 
-      return isStartOrEnd || isLocale || isDescription;
-    });
-
-    for (String arbLine in arbLines) {
-      String key = arbLine.split('"')[1];
+    for (final line in arbLines) {
+      final key = line.split('"')[1];
       arbTranslationKeys.add(key);
     }
 
@@ -108,45 +89,33 @@ class ArbService {
   }
 
   List<Arb> getArbs(String excelPath) {
-    Sheet? sheet = _getExcelSheet(excelPath);
-    List<Arb> arbs = [];
+    final Sheet? sheet = _getExcelSheet(excelPath);
+    if (sheet == null) return [];
 
-    if (sheet != null) {
-      arbs = _createEmptyArbs(sheet, firstTranslationIndex);
+    final arbs = _createEmptyArbs(sheet, firstTranslationIndex);
 
-      // Walk through rows
-      for (int i = 1; i < sheet.rows.length; i++) {
-        SharedString? key = sheet.rows[i].first?.value;
+    for (var row in sheet.rows.skip(1)) {
+      final String? keyText = _cellValueToString(row.first?.value);
+      if (keyText == null) continue;
 
-        if (key == null) {
-          continue;
-        }
+      final String description =
+          _cellValueToString(row[1]?.value) ?? '';
 
-        String description = sheet.rows[i][1]?.value.node.text ?? '';
+      for (var c = firstTranslationIndex; c < row.length; c++) {
+        final String? rawText = _cellValueToString(row[c]?.value);
+        if (rawText?.trim().isEmpty ?? true) continue;
 
-        // Walk through columns
-        for (int c = firstTranslationIndex; c < sheet.rows[i].length; c++) {
-          dynamic value = sheet.rows[i][c]?.value;
+        final text = rawText!.replaceAll('\r', '').replaceAll('\n', r'\n');
+        final placeholders = _extractPlaceholders(text);
 
-          if (value == null || value.toString().trim().isEmpty) {
-            continue;
-          }
-
-          String text =
-              value is SharedString ? value.node.text : value.toString();
-
-          List<String> placeholders = _extractPlaceholders(text);
-
-          Translation translation = Translation(
-            key: key.node.text,
-            translation: text.replaceAll('\r', '').replaceAll('\n', r'\n'),
-            description:
-                description.replaceAll('\r', '').replaceAll('\n', r'\n'),
+        arbs[c - firstTranslationIndex].translations.add(
+          Translation(
+            key: keyText,
+            translation: text,
+            description: description.replaceAll('\r', '').replaceAll('\n', r'\n'),
             placeholders: placeholders,
-          );
-
-          arbs[c - firstTranslationIndex].translations.add(translation);
-        }
+          ),
+        );
       }
     }
 
@@ -154,25 +123,45 @@ class ArbService {
   }
 
   List<String> _extractPlaceholders(String text) {
-    RegExp exp = RegExp(r'\{(\w+)\}');
-    Iterable<RegExpMatch> matches = exp.allMatches(text);
-    return matches.map((m) => m.group(1)!).toList();
+    final exp = RegExp(r'\{(\w+)\}');
+    return exp.allMatches(text).map((m) => m.group(1)!).toList();
   }
 
   List<Arb> _createEmptyArbs(Sheet sheet, int firstTranslationIndex) {
-    List<Arb> arbs = [];
-
-    for (int i = firstTranslationIndex; i < sheet.rows.first.length; i++) {
-      SharedString locale = sheet.rows.first[i]?.value;
-      arbs.add(Arb(locale: locale.node.text, translations: []));
-    }
-
-    return arbs;
+    return [
+      for (var i = firstTranslationIndex; i < sheet.rows.first.length; i++)
+        Arb(locale: _cellValueToString(sheet.rows.first[i]?.value)!, translations: [])
+    ];
   }
 
   Sheet? _getExcelSheet(String filePath) {
-    Uint8List bytes = File(filePath).readAsBytesSync();
-    Excel excel = Excel.decodeBytes(bytes);
+    final Uint8List bytes = File(filePath).readAsBytesSync();
+    final Excel excel = Excel.decodeBytes(bytes);
     return excel.tables[excel.tables.keys.first];
+  }
+
+  /// Converts any CellValue subtype to its String representation.
+  String? _cellValueToString(CellValue? cell) {
+    if (cell == null) return null;
+    if (cell is TextCellValue) {
+      return cell.value.text ?? '';
+    } else if (cell is IntCellValue) {
+      return cell.value.toString();
+    } else if (cell is DoubleCellValue) {
+      return cell.value.toString();
+    } else if (cell is BoolCellValue) {
+      return cell.value.toString();
+    } else if (cell is DateCellValue) {
+      return cell.asDateTimeLocal().toIso8601String();
+    } else if (cell is DateTimeCellValue) {
+      return cell.asDateTimeLocal().toIso8601String();
+    } else if (cell is TimeCellValue) {
+      return cell.asDuration().toString();
+    } else if (cell is FormulaCellValue) {
+      // Use the last calculated result
+      return cell.formula;
+    }
+    // Fallback
+    return cell.toString();
   }
 }

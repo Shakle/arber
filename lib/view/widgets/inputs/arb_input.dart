@@ -1,5 +1,6 @@
 import 'package:arber/data/enums.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
+import 'package:arber/view/widgets/animations/dash.dart';
 import 'package:arber/view/widgets/buttons/file_picker_button.dart';
 import 'package:arber/view/widgets/inputs/input_row.dart';
 import 'package:arber/view/widgets/inputs/path_input.dart';
@@ -13,14 +14,20 @@ class ArbInput extends StatelessWidget {
   Widget build(BuildContext context) {
     PathCubit pathCubit = context.read<PathCubit>();
 
-    return InputRow(
-      input: PathInput.mainArbPath(
-        controller: pathCubit.arbFilePathController,
-      ),
-      fileButton: FilePickerButton.file(
-        controller: pathCubit.arbFilePathController,
-        tooltipMessage: 'Main Arb file',
-        artifactType: ArtifactType.mainArb,
+    return MouseRegion(
+      onEnter: (_) {
+        dashAnimationNotifier.value = DashAnimationState.idle;
+        dashAnimationNotifier.value = DashAnimationState.lookUp;
+      },
+      child: InputRow(
+        input: PathInput.mainArbPath(
+          controller: pathCubit.arbFilePathController,
+        ),
+        fileButton: FilePickerButton.file(
+          controller: pathCubit.arbFilePathController,
+          tooltipMessage: 'Main Arb file',
+          artifactType: ArtifactType.mainArb,
+        ),
       ),
     );
   }

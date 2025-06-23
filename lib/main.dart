@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:arber/application.dart';
 import 'package:arber/data/constants.dart';
+import 'package:arber/logic/blocs/update/update_cubit.dart';
 import 'package:arber/services/storage_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
@@ -31,5 +33,9 @@ void main() async {
     });
   }
 
-  runApp(const Application());
+  runApp(BlocProvider(
+    lazy: false,
+    create: (context) => UpdateCubit(),
+    child: const Application(),
+  ));
 }

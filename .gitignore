@@ -48,3 +48,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /lib/gen/
+/devtools_options.yaml

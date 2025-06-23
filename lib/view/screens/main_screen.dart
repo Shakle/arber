@@ -1,4 +1,5 @@
 import 'package:arber/logic/blocs/arb/arb_cubit.dart';
+import 'package:arber/logic/blocs/update/update_cubit.dart';
 import 'package:arber/theme/borders.dart';
 import 'package:arber/theme/colors.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
@@ -6,6 +7,7 @@ import 'package:arber/view/widgets/animations/success_animation.dart';
 import 'package:arber/view/widgets/background_field.dart';
 import 'package:arber/view/widgets/basf_logo.dart';
 import 'package:arber/view/widgets/buttons/generate_button.dart';
+import 'package:arber/view/widgets/buttons/settings_icon_button.dart';
 import 'package:arber/view/widgets/description.dart';
 import 'package:arber/view/widgets/inputs/arb_input.dart';
 import 'package:arber/view/widgets/inputs/main_inputs.dart';
@@ -71,7 +73,42 @@ class MainScreen extends StatelessWidget {
   Widget leftColumn(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.18),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.18,
+          child: Align(
+            alignment: const Alignment(-1, 0.3),
+            child: Row(
+              spacing: 5,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: 20),
+                  child: SettingsIconButton(),
+                ),
+                BlocBuilder<UpdateCubit, UpdateState>(
+                  builder: (context, state) {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: switch(state) {
+                        UpdateChecked(:final isUpdateAvailable)
+                        when isUpdateAvailable => Row(
+                          children: [
+                            const Icon(Icons.arrow_left),
+                            BackgroundField(
+                              borderRadius: BorderRadius.circular(30),
+                              padding: const EdgeInsets.all(9),
+                              child: const Text('Update available 🦾'),
+                            ),
+                          ],
+                        ),
+                       _ => const SizedBox(),
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
         const Align(
             alignment: Alignment(-1, 0.6),
             child: BasfLogo()

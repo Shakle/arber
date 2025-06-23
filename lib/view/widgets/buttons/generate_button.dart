@@ -27,40 +27,37 @@ class GenerateButton extends StatelessWidget {
             height: 48,
             width: 180,
             child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: isActive ? Colors.white : Colors.grey,
-                  backgroundColor: isActive ? smoothBlue : Colors.grey.shade200,
-                  padding: const EdgeInsets.all(20),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                  ),
+              style: TextButton.styleFrom(
+                foregroundColor: isActive ? Colors.white : Colors.grey,
+                backgroundColor: isActive ? smoothBlue : Colors.grey.shade200,
+                padding: const EdgeInsets.all(20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                onPressed: () {
-                  if (isActive && !isGenerating) {
-                    context.read<ArbCubit>().generateARBs(
-                      pathState.pathArtifact.excelFile.path,
-                      pathState.pathArtifact.l10nDirectory,
-                    );
-                  }
-                },
-                child: isGenerating
-                    ? loader()
-                    : const Text('Create translations'),
+              ),
+              onPressed: () {
+                if (isActive && !isGenerating) {
+                  context.read<ArbCubit>().generateARBs(
+                    pathState.pathArtifact.excelFile.path,
+                    pathState.pathArtifact.l10nDirectory,
+                  );
+                }
+              },
+              child: isGenerating
+                  ? loader()
+                  : const Text('Create translations'),
             ),
           ),
         );
-      }
+      },
     );
   }
 
   Widget loader() {
     return const SizedBox(
-        height: 17,
-        width: 17,
-        child: CircularProgressIndicator(
-            strokeWidth: 3,
-            color: Colors.white
-        ),
+      height: 17,
+      width: 17,
+      child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
     );
   }
 }

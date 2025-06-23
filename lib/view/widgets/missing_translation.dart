@@ -36,9 +36,7 @@ class MissingTranslationWindow extends StatelessWidget {
                 children: [
                   BackgroundField(
                     borderRadius: allRoundBorderRadius,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 40,
-                    ),
+                    padding: const EdgeInsets.only(top: 40),
                     child: SizedBox(
                       width: double.infinity,
                       height: double.infinity,
@@ -75,9 +73,13 @@ class MissingTranslationWindow extends StatelessWidget {
           if (state.arbData.missingKeys.isNotEmpty
               || state.arbData.missingTranslations.isNotEmpty) {
             return Padding(
-              padding: const EdgeInsets.only(top: 20),
+              padding: const EdgeInsets.only(top: 20, bottom: 10),
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
+                padding: const EdgeInsets.only(
+                  left: 40,
+                  right: 40,
+                  bottom: 30,
+                ),
                 children: [
                   ...keysMissingWidgets(state),
                   ...translationsMissingWidgets(state),

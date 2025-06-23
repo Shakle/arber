@@ -4,6 +4,7 @@ import 'package:arber/data/models/arb_data.dart';
 import 'package:arber/logic/blocs/arb/arb_cubit.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
 import 'package:arber/services/arb_service.dart';
+import 'package:arber/view/widgets/animations/dash.dart';
 import 'package:computer/computer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,6 +42,7 @@ class TranslationCubit extends Cubit<TranslationState> {
   Future<void> checkArbExcelDifference() async {
     late final Computer computer;
     try {
+      dashAnimationNotifier.value = DashAnimationState.slowDance;
       emit(TranslationGenerating());
 
       computer = Computer.create();
@@ -58,6 +60,7 @@ class TranslationCubit extends Cubit<TranslationState> {
       emit(TranslationError(errorMessage: e.toString()));
     } finally {
       await computer.turnOff();
+      dashAnimationNotifier.value = DashAnimationState.idle;
     }
   }
 

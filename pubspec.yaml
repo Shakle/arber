@@ -3,7 +3,7 @@ description: Arb Excel translator
 
 publish_to: 'none'
 
-version: 1.1.0+13
+version: 1.1.1+14
 
 environment:
   sdk: ^3.8.1
@@ -23,7 +23,7 @@ dependencies:
 
   dio: ^5.8.0+1
 
-  window_manager: ^0.5.0
+  window_manager: ^0.5.1
   package_info_plus: ^8.3.0
 
 dev_dependencies:

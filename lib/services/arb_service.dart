@@ -81,8 +81,12 @@ class ArbService {
       });
 
     for (final line in arbLines) {
-      final key = line.split('"')[1];
-      arbTranslationKeys.add(key);
+      if (line.length >= 2) {
+        final key = line.split('"')[1];
+        arbTranslationKeys.add(key);
+      } else {
+        arbTranslationKeys.add(line);
+      }
     }
 
     return arbTranslationKeys;
@@ -130,7 +134,11 @@ class ArbService {
   List<Arb> _createEmptyArbs(Sheet sheet, int firstTranslationIndex) {
     return [
       for (var i = firstTranslationIndex; i < sheet.rows.first.length; i++)
-        Arb(locale: _cellValueToString(sheet.rows.first[i]?.value)!, translations: [])
+        if (_cellValueToString(sheet.rows.first[i]?.value) != null)
+          Arb(locale: _cellValueToString(
+              sheet.rows.first[i]?.value)!,
+              translations: [],
+          ),
     ];
   }
 

@@ -16,8 +16,8 @@ class Translation {
     String descriptionRow = '  "@$key": {\n    "description": "$description"';
 
     if (placeholders.isNotEmpty) {
-      String placeholdersRow =
-          placeholders.map((p) => '      "$p": {}\n').join();
+      String placeholdersRow = '${placeholders.map((p) => '      "$p": {}')
+          .join(',\n')}\n';
       descriptionRow += ',\n    "placeholders": {\n$placeholdersRow    }';
     }
 

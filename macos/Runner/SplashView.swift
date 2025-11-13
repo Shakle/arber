@@ -14,7 +14,7 @@ class SplashView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func fadeOutAndRemove(duration: Double = 0.18, delay: Double = 0.03) {
+    func fadeOutAndRemove(duration: Double = 0.35, delay: Double = 0.05) {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = duration

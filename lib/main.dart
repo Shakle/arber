@@ -20,7 +20,6 @@ void main() async {
     WindowOptions windowOptions = WindowOptions(
       minimumSize: const Size(1000, 700),
       size: const Size(1050, 750),
-      backgroundColor: Colors.transparent,
       titleBarStyle: Platform.isMacOS
           ? TitleBarStyle.hidden
           : TitleBarStyle.normal,

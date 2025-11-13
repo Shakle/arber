@@ -57,15 +57,12 @@ class PathInput extends StatelessWidget {
       },
       buildWhen: (prevState, state) => state is! PathInitial,
       builder: (context, state) {
-        return Form(
-          child: TextFormField(
-            autovalidateMode: AutovalidateMode.always,
-            controller: controller,
-            style: AppTheme.inputTextStyle,
-            decoration: InputDecoration(
-              hintText: hint,
-              suffixIcon: getIcon(state),
-            ),
+        return TextField(
+          controller: controller,
+          style: AppTheme.inputTextStyle,
+          decoration: InputDecoration(
+            hintText: hint,
+            suffixIcon: getIcon(state),
           ),
         );
       }

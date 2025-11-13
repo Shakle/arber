@@ -6,6 +6,8 @@ import 'package:arber/data/models/file_exception.dart';
 import 'package:arber/data/models/pathway.dart';
 import 'package:arber/services/file_service.dart';
 import 'package:arber/services/storage_service.dart';
+import 'package:directory_bookmarks/directory_bookmarks.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,46 +15,44 @@ part 'path_state.dart';
 
 class PathCubit extends Cubit<PathState> {
   PathCubit() : super(PathInitial()) {
-    pathTimer = Timer.periodic(const Duration(milliseconds: 100), _pathListener);
-    restorePaths();
+    excelFilePathController = TextEditingController()..addListener(_checkPaths);
+    arbFilePathController = TextEditingController()..addListener(_checkPaths);
+    l10nDirPathController = TextEditingController()..addListener(_checkPaths);
+    _restorePaths();
   }
 
   final FileService _fileService = FileService();
   final StorageService _storageService = StorageService();
-  final TextEditingController excelFilePathController
-    = TextEditingController();
-  final TextEditingController arbFilePathController
-  = TextEditingController();
-  final TextEditingController l10nDirectoryPathController
-    = TextEditingController();
 
-  late final Timer pathTimer;
+  late final TextEditingController excelFilePathController;
+  late final TextEditingController arbFilePathController;
+  late final TextEditingController l10nDirPathController;
 
   File get excelFile => File(excelFilePathController.text);
   File get arbFile => File(arbFilePathController.text);
-  Directory get l10nDirectory => Directory(l10nDirectoryPathController.text);
+  Directory get l10nDirectory => Directory(l10nDirPathController.text);
 
-  Future<void> _pathListener(Timer timer) async {
+  Future<void> _checkPaths() async {
     bool excelSuccess = excelFilePathController.text.isNotEmpty
         && excelPathValidator() == null;
-    bool l10nSuccess = l10nDirectoryPathController.text.isNotEmpty
+    bool l10nSuccess = l10nDirPathController.text.isNotEmpty
         && l10nPathValidator() == null;
     bool arbSuccess = arbFilePathController.text.isNotEmpty
         && arbPathValidator() == null;
 
     await savePaths(
-        excelSuccess: excelSuccess,
-        l10nSuccess: l10nSuccess,
-        arbSuccess: arbSuccess,
+      excelSuccess: excelSuccess,
+      l10nSuccess: l10nSuccess,
+      arbSuccess: arbSuccess,
     );
 
     if (excelSuccess && l10nSuccess && arbPathValidator() == null) {
       emitSuccess(arbSuccess);
     } else {
       emitConnectionFailed(
-          arbSuccess: arbSuccess,
-          excelSuccess: excelSuccess,
-          l10nSuccess: l10nSuccess,
+        arbSuccess: arbSuccess,
+        excelSuccess: excelSuccess,
+        l10nSuccess: l10nSuccess,
       );
     }
   }
@@ -114,21 +114,31 @@ class PathCubit extends Cubit<PathState> {
         ? await _storageService.saveExcelPath(excelFilePathController.text)
         : await _storageService.removeExcelPath();
     l10nSuccess
-        ? await _storageService.saveL10nPath(l10nDirectoryPathController.text)
+        ? await _storageService.saveL10nPath(l10nDirPathController.text)
         : await _storageService.removeL10nPath();
     arbSuccess
         ? await _storageService.saveMainArbPath(arbFilePathController.text)
         : await _storageService.removeMainArbPath();
   }
 
-  void restorePaths() {
-    excelFilePathController.text = _storageService.getExcelPath();
-    l10nDirectoryPathController.text = _storageService.getL10nPath();
-    arbFilePathController.text = _storageService.getMainArbPath();
+  Future<void> _restorePaths() async {
+    await Future.wait([
+      if (!kIsWeb && Platform.isMacOS)
+        DirectoryBookmarkHandler.resolveBookmark(),
+      _storageService.getExcelPath()
+          .then((v) => excelFilePathController.text = v),
+      _storageService.getL10nPath()
+          .then((v) => l10nDirPathController.text = v),
+      _storageService.getMainArbPath()
+          .then((v) => arbFilePathController.text = v),
+    ]);
+
+    await _checkPaths();
   }
 
   String? excelPathValidator() {
-    if (excelFilePathController.text.isNotEmpty && !excelFile.existsSync()) {
+    if (excelFilePathController.text.isNotEmpty
+        && !excelFile.existsSync()) {
       return 'File does not exist';
     }
 
@@ -145,8 +155,7 @@ class PathCubit extends Cubit<PathState> {
       return 'File does not exist';
     }
 
-    if (arbFile.existsSync()
-        && !arbFile.path.split('.').last.contains('arb')) {
+    if (arbFile.existsSync() && !arbFile.path.split('.').last.contains('arb')) {
       return 'File must be .arb';
     }
 
@@ -154,9 +163,7 @@ class PathCubit extends Cubit<PathState> {
   }
 
   String? l10nPathValidator() {
-    if (l10nDirectoryPathController.text.isNotEmpty
-        && !l10nDirectory.existsSync()
-    ) {
+    if (l10nDirPathController.text.isNotEmpty && !l10nDirectory.existsSync()) {
       return 'Directory does not exist';
     }
 
@@ -187,14 +194,18 @@ class PathCubit extends Cubit<PathState> {
     String? dirPath = await _fileService.getDirectoryPath();
 
     if (dirPath != null) {
-      l10nDirectoryPathController.text = dirPath;
+      l10nDirPathController.text = dirPath;
+      if (!kIsWeb && Platform.isMacOS) {
+        await DirectoryBookmarkHandler.saveBookmark(dirPath);
+      }
     }
   }
 
   @override
   Future<void> close() {
     excelFilePathController.dispose();
-    l10nDirectoryPathController.dispose();
+    l10nDirPathController.dispose();
+    arbFilePathController.dispose();
     return super.close();
   }
 }

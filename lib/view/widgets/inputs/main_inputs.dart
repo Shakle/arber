@@ -45,11 +45,11 @@ class FileInputs extends StatelessWidget {
           },
           child: InputRow(
             input: PathInput.l10nPath(
-              controller: pathCubit.l10nDirectoryPathController,
+              controller: pathCubit.l10nDirPathController,
             ),
             fileButton: FilePickerButton.directory(
               tooltipMessage: 'L10n directory',
-              controller: pathCubit.l10nDirectoryPathController,
+              controller: pathCubit.l10nDirPathController,
             ),
           ),
         ),

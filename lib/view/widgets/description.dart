@@ -22,16 +22,17 @@ class Description extends StatelessWidget {
           const TextSpan(
             style: TextStyle(color: Colors.black, fontSize: 14),
             text:
-                'Hi 🐦, this is how to use it.'
-                '\n\n1. Share .xlsx file across your team'
-                '\n2. Edit it online in a browser'
-                '\n3. Download a copy of .xlsx'
-                '\n4. Choose the file in first input'
-                '\n5. Choose project l10n directory in the second one'
-                '\n6. Choose main arb file to match if something is missing in excel'
-                '\n7. Click refresh on the left to see any missing translations'
-                '\n8. Click create translations to put new .arb files to your project'
-                '\n\nThanks for using ❤️',
+              'Hi 🐦, this is how to use it.'
+              '\n\n1. Share .xlsx file across your team'
+              '\n2. Edit it online in a browser'
+              '\n3. Download a copy of .xlsx'
+              '\n4. Choose the file in first input'
+              '\n5. Choose project l10n directory in the second one'
+              '\n6. Choose main arb file to match if something is missing in excel'
+              '\n7. Click refresh on the left to see any missing translations'
+              '\n8. Click create translations to put new .arb files to your project'
+              '\n\nKeep excel file in downloads folder and main arb in l10n 😉'
+              '\n\nThanks for using ❤️',
           ),
           TextSpan(
             style: const TextStyle(color: Colors.grey),

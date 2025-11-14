@@ -80,10 +80,7 @@ class SettingsScreen extends StatelessWidget {
   Widget errorLayout(BuildContext context, String message) {
     return BackgroundField(
       borderRadius: allRoundBorderRadius,
-      child: Column(
-        spacing: 20,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      child: ListView(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -98,6 +95,7 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 20),
           SelectableText(message),
         ],
       ),

@@ -20,7 +20,8 @@
         {
           "blend-mode" : "normal",
           "fill" : "automatic",
-          "glass" : true,
+          "glass" : false,
+          "hidden" : false,
           "image-name" : "logo_preview.png",
           "name" : "logo_preview",
           "position-specializations" : [

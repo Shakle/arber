@@ -1,12 +1,11 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:arber/data/enums.dart';
 import 'package:arber/data/models/file_exception.dart';
 import 'package:arber/data/models/pathway.dart';
+import 'package:arber/services/bookmark_service.dart';
 import 'package:arber/services/file_service.dart';
 import 'package:arber/services/storage_service.dart';
-import 'package:directory_bookmarks/directory_bookmarks.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,6 +22,7 @@ class PathCubit extends Cubit<PathState> {
 
   final FileService _fileService = FileService();
   final StorageService _storageService = StorageService();
+  late final BookmarkService _bookmarkService = BookmarkService(_storageService);
 
   late final TextEditingController excelFilePathController;
   late final TextEditingController arbFilePathController;
@@ -124,7 +124,7 @@ class PathCubit extends Cubit<PathState> {
   Future<void> _restorePaths() async {
     await Future.wait([
       if (!kIsWeb && Platform.isMacOS)
-        DirectoryBookmarkHandler.resolveBookmark(),
+        _bookmarkService.restoreAllAccess(),
       _storageService.getExcelPath()
           .then((v) => excelFilePathController.text = v),
       _storageService.getL10nPath()
@@ -179,6 +179,12 @@ class PathCubit extends Cubit<PathState> {
 
     if (filePath != null) {
       excelFilePathController.text = filePath;
+      if (!kIsWeb && Platform.isMacOS) {
+        await _bookmarkService.createBookmark(
+          id: ArtifactType.excel,
+          path: filePath,
+        );
+      }
     }
   }
 
@@ -187,6 +193,12 @@ class PathCubit extends Cubit<PathState> {
 
     if (filePath != null) {
       arbFilePathController.text = filePath;
+      if (!kIsWeb && Platform.isMacOS) {
+        await _bookmarkService.createBookmark(
+          id: ArtifactType.mainArb,
+          path: filePath,
+        );
+      }
     }
   }
 
@@ -196,7 +208,10 @@ class PathCubit extends Cubit<PathState> {
     if (dirPath != null) {
       l10nDirPathController.text = dirPath;
       if (!kIsWeb && Platform.isMacOS) {
-        await DirectoryBookmarkHandler.saveBookmark(dirPath);
+        await _bookmarkService.createBookmark(
+          id: ArtifactType.l10n,
+          path: dirPath,
+        );
       }
     }
   }

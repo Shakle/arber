@@ -48,23 +48,28 @@ class _FilePickerButtonState extends State<FilePickerButton> {
           onPressed: isLoading
               ? null
               : () => onPressed(context.read<PathCubit>()),
-          icon: isLoading ? loader() : fileIcon(),
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: isLoading ? loader() : fileIcon(),
+          ),
       ),
     );
   }
 
   Widget fileIcon() {
     return const Icon(
-        Icons.folder_outlined,
-        color: Colors.black54,
+      key: ValueKey('file_icon'),
+      Icons.folder_outlined,
+      color: Colors.black54,
     );
   }
 
   Widget loader() {
     return const SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(color: smoothBlue),
+      key: ValueKey('file_loader'),
+      height: 20,
+      width: 20,
+      child: CircularProgressIndicator(color: smoothBlue),
     );
   }
 
@@ -72,17 +77,12 @@ class _FilePickerButtonState extends State<FilePickerButton> {
     setState(() => isLoading = true);
 
     switch (widget.pickType) {
-      case PickType.file:
-        if (widget._artifactType == ArtifactType.excel) {
-          await pathCubit.pickExcelFile();
-        }
-        if (widget._artifactType == ArtifactType.mainArb) {
-          await pathCubit.pickMainArbFile();
-        }
-        break;
-      case PickType.directory:
-        await pathCubit.pickL10nDirectory();
-        break;
+      case PickType.file: switch(widget._artifactType) {
+        case ArtifactType.excel: await pathCubit.pickExcelFile();
+        case ArtifactType.mainArb: await pathCubit.pickMainArbFile();
+        default: break;
+      }
+      case PickType.directory: await pathCubit.pickL10nDirectory();
     }
 
     setState(() => isLoading = false);

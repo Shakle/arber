@@ -31,7 +31,6 @@ class Description extends StatelessWidget {
               '\n6. Choose main arb file to match if something is missing in excel'
               '\n7. Click refresh on the left to see any missing translations'
               '\n8. Click create translations to put new .arb files to your project'
-              '\n\nKeep excel file in downloads folder and main arb in l10n 😉'
               '\n\nThanks for using ❤️',
           ),
           TextSpan(

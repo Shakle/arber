@@ -3,7 +3,7 @@ description: Arb Excel translator
 
 publish_to: 'none'
 
-version: 1.2.1+17
+version: 1.2.2+18
 
 environment:
   sdk: ^3.10.0

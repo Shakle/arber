@@ -3,18 +3,18 @@ description: Arb Excel translator
 
 publish_to: 'none'
 
-version: 1.2.2+18
+version: 1.2.3+19
 
 environment:
-  sdk: ^3.10.7
+  sdk: ^3.11.0
 
 dependencies:
   flutter:
     sdk: flutter
 
-  rive: ^0.13.20
+  rive: 0.13.20
 
-  file_picker: ^10.3.8
+  file_picker: ^10.3.10
   excel:
     git:
       url: https://github.com/justkawal/excel
@@ -24,7 +24,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   shared_preferences: ^2.5.4
 
-  dio: ^5.9.0
+  dio: ^5.9.1
 
   window_manager: ^0.5.1
   package_info_plus: ^9.0.0
@@ -33,7 +33,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  build_runner: ^2.10.4
+  build_runner: ^2.11.1
   flutter_gen_runner: ^5.12.0
   flutter_lints: ^6.0.0
 

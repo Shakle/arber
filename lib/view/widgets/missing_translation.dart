@@ -242,18 +242,19 @@ class MissingTranslationWindow extends StatelessWidget {
           return loader();
         }
 
-        return IconButton(
-          onPressed: () {
-            context.read<TranslationCubit>()
-                .checkArbExcelDifference();
-          },
-          splashRadius: 25,
-          icon: const Tooltip(
-            message: 'Check missing translations',
-            child: Icon(
-              Icons.refresh_rounded,
-              color: smoothBlue,
-              size: 28,
+        return Align(
+          child: IconButton(
+            onPressed: () {
+              context.read<TranslationCubit>()
+                  .checkArbExcelDifference();
+            },
+            icon: const Tooltip(
+              message: 'Check missing translations',
+              child: Icon(
+                Icons.refresh_rounded,
+                color: smoothBlue,
+                size: 28,
+              ),
             ),
           ),
         );

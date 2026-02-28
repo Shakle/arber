@@ -54,6 +54,10 @@ class StorageService {
     await _sharedPrefs.setString(_bookMarkPath(bookmark.id), json);
   }
 
+  Future<void> removeBookmark(ArtifactType id) async {
+    await _sharedPrefs.remove(_bookMarkPath(id));
+  }
+
   Future<Bookmark?> getBookmark(ArtifactType id) async {
     String? json = await _sharedPrefs.getString(_bookMarkPath(id));
     return json != null ? Bookmark.fromJson(jsonDecode(json)) : null;

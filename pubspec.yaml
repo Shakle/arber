@@ -3,7 +3,7 @@ description: Arb Excel translator
 
 publish_to: 'none'
 
-version: 1.2.3+19
+version: 1.2.4+20
 
 environment:
   sdk: ^3.11.0
@@ -19,7 +19,6 @@ dependencies:
     git:
       url: https://github.com/justkawal/excel
       ref: 37e0807f97fe8c293bdf75441cf21413b322882d
-  computer: ^3.2.1
 
   flutter_bloc: ^9.1.1
   shared_preferences: ^2.5.4

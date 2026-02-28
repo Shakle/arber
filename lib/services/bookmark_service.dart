@@ -29,13 +29,22 @@ class BookmarkService {
 
   /// Start accessing all saved bookmarks (should be called on app startup).
   Future<void> restoreAllAccess() async {
-    List<Bookmark> bookmarks = await _storageService.getAllBookmarks();
+    final List<Bookmark> bookmarks = await _storageService.getAllBookmarks();
 
-    await Future.wait(bookmarks.map((bookmark) {
-      return _channel.invokeMethod<bool>(
-        'startAccessing',
-        {'bookmark': bookmark.base64},
-      );
-    }));
+    for (final bookmark in bookmarks) {
+      try {
+        await _channel.invokeMethod<bool>(
+          'startAccessing',
+          {'bookmark': bookmark.base64},
+        );
+      } on PlatformException catch (e) {
+        // Corrupted/obsolete bookmark should not break startup.
+        if (e.code == 'RESOLVE_ERROR') {
+          await _storageService.removeBookmark(bookmark.id);
+        }
+      } catch (_) {
+        // Ignore any other access errors and continue restoring the rest.
+      }
+    }
   }
 }

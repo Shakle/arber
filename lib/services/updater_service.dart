@@ -113,6 +113,19 @@ class UpdaterService {
       );
     }
 
+    // While the quarantine flag is still set, Gatekeeper runs the app from a
+    // read-only nullfs mount under AppTranslocation, so the bundle cannot be
+    // replaced in place. Moving the app in Finder clears quarantine and stops
+    // translocation.
+    if (bundle.path.contains('/AppTranslocation/')) {
+      throw const UpdaterException(
+        'Arber is running from a temporary read-only copy, because macOS has '
+        'not cleared its quarantine flag yet.\n'
+        'Move Arber into your Applications folder using Finder, reopen it from '
+        'there, and update again.',
+      );
+    }
+
     return bundle.path;
   }
 

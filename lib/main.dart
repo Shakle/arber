@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:arber/application.dart';
 import 'package:arber/data/constants.dart';
 import 'package:arber/logic/blocs/update/update_cubit.dart';
+import 'package:arber/services/prefs_migration_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -14,6 +15,8 @@ void main() async {
   await Future.wait([
     windowManager.ensureInitialized(),
     PackageInfo.fromPlatform().then((info) => packageInfo = info),
+    // Must run before anything reads preferences.
+    PrefsMigrationService().migrate(),
   ]);
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {

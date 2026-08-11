@@ -43,26 +43,16 @@ class SettingsScreen extends StatelessWidget {
             maxWidth: constraints.maxWidth * 0.4,
             maxHeight: constraints.maxHeight * 0.35,
           ),
-          child: BlocConsumer<UpdateCubit, UpdateState>(
-            listenWhen: (pState, state) => state is UpdateSuccess,
-            listener: (context, state) => showSuccessMessage(context),
+          child: BlocBuilder<UpdateCubit, UpdateState>(
             builder: (context, state) {
               return AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
                 child: switch (state) {
-                  UpdateChecked(
-                      :String currentVersion,
-                      :String availableVersion,
-                      :bool isUpdateAvailable,
-                  ) =>
-                      layout(
-                        currentVersion: currentVersion,
-                        availableVersion: availableVersion,
-                        isUpdateAvailable: isUpdateAvailable,
-                      ),
-                  UpdateInstalling(
+                  UpdateChecked checked => layout(checked),
+                  UpdateDownloading(
                       :double updatePercent,
-                  ) => updateLayout(updatePercent),
+                  ) => downloadLayout(updatePercent),
+                  UpdateApplying() => applyingLayout(),
                   UpdateError(:String message) => errorLayout(
                     context,
                     message,
@@ -102,7 +92,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget updateLayout(double completePercent) {
+  Widget downloadLayout(double completePercent) {
     return BackgroundField(
       borderRadius: allRoundBorderRadius,
       padding: const EdgeInsets.all(20),
@@ -129,6 +119,30 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  Widget applyingLayout() {
+    return BackgroundField(
+      borderRadius: allRoundBorderRadius,
+      padding: const EdgeInsets.all(20),
+      child: const SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 15,
+          children: [
+            DashAnimation(initialAnimation: DashAnimationState.slowDance),
+            Text('Installing...'),
+            SizedBox(height: 5),
+            Text(
+              'Arber will restart in a moment',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget loading() {
     return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -140,13 +154,9 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget layout({
-    required String currentVersion,
-    required String availableVersion,
-    required bool isUpdateAvailable,
-  }) {
-    final String newVersion = isUpdateAvailable
-        ? 'Available version: $availableVersion'
+  Widget layout(UpdateChecked state) {
+    final String newVersion = state.isNewerVersionAvailable
+        ? 'Available version: ${state.availableVersion}'
         : 'No updates available';
 
     return SizedBox(
@@ -158,12 +168,22 @@ class SettingsScreen extends StatelessWidget {
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Current version: $currentVersion'),
+              Text('Current version: ${state.currentVersion}'),
               Text(newVersion),
 
-              if (isUpdateAvailable) ...[
+              if (state.isUpdateAvailable) ...[
                 const SizedBox(height: 20),
                 updateButton(),
+              ],
+
+              // A newer release exists but ships no build for this platform —
+              // Windows builds are published irregularly.
+              if (state.isUpdateUnavailableHere) ...[
+                const SizedBox(height: 10),
+                const Text(
+                  'No build for this platform in that release yet',
+                  textAlign: TextAlign.center,
+                ),
               ],
             ],
           ),
@@ -187,37 +207,9 @@ class SettingsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          child: const Text('Download'),
+          child: const Text('Update & restart'),
         );
       },
-    );
-  }
-
-  void showSuccessMessage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
-        content: const Row(
-          children: [
-            Icon(Icons.done, color: Colors.white),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'New version is downloaded to Downloads folder',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: smoothBlue,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
     );
   }
 }

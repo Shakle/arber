@@ -4,7 +4,7 @@ import 'package:arber/logic/blocs/translation/translation_cubit.dart';
 import 'package:arber/theme/borders.dart';
 import 'package:arber/theme/colors.dart';
 import 'package:arber/view/widgets/background_field.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MissingTranslationWindow extends StatelessWidget {

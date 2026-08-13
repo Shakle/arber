@@ -1,6 +1,6 @@
 import 'package:arber/gen/assets.gen.dart';
 import 'package:arber/theme/colors.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class BasfLogo extends StatelessWidget {
   const BasfLogo({super.key});

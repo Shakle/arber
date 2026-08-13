@@ -12,7 +12,7 @@ import 'package:arber/view/widgets/description.dart';
 import 'package:arber/view/widgets/inputs/arb_input.dart';
 import 'package:arber/view/widgets/inputs/main_inputs.dart';
 import 'package:arber/view/widgets/missing_translation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainScreen extends StatelessWidget {

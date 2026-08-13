@@ -4,7 +4,7 @@ import 'package:arber/view/widgets/animations/dash.dart';
 import 'package:arber/view/widgets/buttons/file_picker_button.dart';
 import 'package:arber/view/widgets/inputs/input_row.dart';
 import 'package:arber/view/widgets/inputs/path_input.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ArbInput extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:arber/data/constants.dart';
 import 'package:arber/theme/borders.dart';
 import 'package:arber/theme/colors.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class Description extends StatelessWidget {
   const Description({super.key});

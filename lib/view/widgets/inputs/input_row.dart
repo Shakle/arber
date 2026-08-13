@@ -1,6 +1,6 @@
 import 'package:arber/view/widgets/buttons/file_picker_button.dart';
 import 'package:arber/view/widgets/inputs/path_input.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class InputRow extends StatelessWidget {
 

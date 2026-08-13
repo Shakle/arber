@@ -1,5 +1,5 @@
 import 'package:arber/gen/assets.gen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:rive/rive.dart';
 
 // ignore_for_file: deprecated_member_use

@@ -1,7 +1,7 @@
 import 'package:arber/theme/colors.dart';
 import 'package:arber/view/screens/settings_screen.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SettingsIconButton extends StatefulWidget {
   const SettingsIconButton({super.key});

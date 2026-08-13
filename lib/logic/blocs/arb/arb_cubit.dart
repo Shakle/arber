@@ -4,7 +4,7 @@ import 'package:arber/data/models/arb.dart';
 import 'package:arber/services/arb_service.dart';
 import 'package:arber/services/file_service.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'arb_state.dart';

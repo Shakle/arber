@@ -4,7 +4,7 @@ import 'package:arber/theme/colors.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
 import 'package:arber/view/widgets/background_field.dart';
 import 'package:arber/view/widgets/buttons/app_back_button.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsScreen extends StatelessWidget {

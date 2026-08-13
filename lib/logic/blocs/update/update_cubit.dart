@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:arber/logic/blocs/update/update_endpoints.dart';
 import 'package:arber/services/updater_service.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 

@@ -5,8 +5,8 @@ import 'package:file_picker/file_picker.dart';
 
 class FileService {
   Future<String?> getFilePath() async {
-    FilePickerResult? result = await FilePicker.pickFiles();
-    return result?.files.single.path;
+    final file = await FilePicker.pickFile();
+    return file?.path;
   }
 
   Future<String?> getDirectoryPath() async => await FilePicker.getDirectoryPath();

@@ -127,8 +127,11 @@ class ArbService {
   }
 
   List<String> _extractPlaceholders(String text) {
-    final exp = RegExp(r'\{(\w+)\}');
-    return exp.allMatches(text).map((m) => m.group(1)!).toList();
+    final exp = RegExp(
+      r'\{(\w+)(?:\}|,\s*(?:plural|select|selectordinal)\s*,)',
+    );
+    // A placeholder can occur in the ICU selector and in several branches.
+    return exp.allMatches(text).map((m) => m.group(1)!).toSet().toList();
   }
 
   List<Arb> _createEmptyArbs(Sheet sheet, int firstTranslationIndex) {

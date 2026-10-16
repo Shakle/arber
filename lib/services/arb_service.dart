@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -6,6 +7,7 @@ import 'package:arber/data/models/arb.dart';
 import 'package:arber/data/models/arb_data.dart';
 import 'package:arber/data/models/missing_translation.dart';
 import 'package:arber/data/models/translation.dart';
+import 'package:arber/services/icu_placeholder_parser.dart';
 
 class ArbService {
   final int firstTranslationIndex = 2;
@@ -21,8 +23,8 @@ class ArbService {
     final excelTranslationKeys = _getExcelTranslationKeys(sheet);
     final List<String> missingKeys = arbPath.isNotEmpty
         ? _getArbTranslationKeys(arbPath)
-        .where((k) => !excelTranslationKeys.contains(k))
-        .toList()
+              .where((k) => !excelTranslationKeys.contains(k))
+              .toList()
         : <String>[];
 
     return ArbData(
@@ -33,18 +35,20 @@ class ArbService {
 
   List<MissingTranslation> _getMissingTranslations(Sheet sheet) {
     final List<MissingTranslation> missingTranslations = [];
+    final locales = _getLocaleColumns(sheet);
 
     // Skip header row
     for (var row in sheet.rows.skip(1)) {
-      final String? keyText = _cellValueToString(row.first?.value);
+      final String? keyText = _cellValueToString(row.firstOrNull?.value);
       if (keyText?.trim().isEmpty ?? true) continue;
 
       final List<String> localesMissing = [];
-      for (var c = firstTranslationIndex; c < row.length; c++) {
-        final String? cellText = _cellValueToString(row[c]?.value);
+      for (final entry in locales.entries) {
+        final String? cellText = entry.key < row.length
+            ? _cellValueToString(row[entry.key]?.value)
+            : null;
         if (cellText?.trim().isEmpty ?? true) {
-          final String? locale = _cellValueToString(sheet.rows[0][c]?.value);
-          if (locale != null) localesMissing.add(locale);
+          localesMissing.add(entry.value);
         }
       }
 
@@ -63,86 +67,74 @@ class ArbService {
 
   List<String> _getExcelTranslationKeys(Sheet sheet) {
     return sheet.rows
-        .map((row) => _cellValueToString(row.first?.value))
+        .skip(1)
+        .map((row) => _cellValueToString(row.firstOrNull?.value))
         .where((key) => key != null && key.trim().isNotEmpty)
         .cast<String>()
         .toList();
   }
 
   List<String> _getArbTranslationKeys(String arbFilePath) {
-    final List<String> arbTranslationKeys = [];
-
-    final File arbFile = File(arbFilePath);
-    final List<String> arbLines = arbFile
-        .readAsLinesSync()
-      ..removeWhere((r) {
-        return r.contains('{') || r.contains('}') ||
-            r.contains('@@')   || r.contains('"description"');
-      });
-
-    for (final line in arbLines) {
-      if (line.length >= 2) {
-        final key = line.split('"')[1];
-        arbTranslationKeys.add(key);
-      } else {
-        arbTranslationKeys.add(line);
-      }
+    final decoded = jsonDecode(File(arbFilePath).readAsStringSync());
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('ARB file must contain a JSON object');
     }
 
-    return arbTranslationKeys;
+    return decoded.keys.where((key) => !key.startsWith('@')).toList();
   }
 
   List<Arb> getArbs(String excelPath) {
     final Sheet? sheet = _getExcelSheet(excelPath);
     if (sheet == null) return [];
 
-    final arbs = _createEmptyArbs(sheet, firstTranslationIndex);
+    final arbs = {
+      for (final entry in _getLocaleColumns(sheet).entries)
+        entry.key: Arb(locale: entry.value, translations: []),
+    };
 
     for (var row in sheet.rows.skip(1)) {
-      final String? keyText = _cellValueToString(row.first?.value);
-      if (keyText == null) continue;
+      final String? keyText = _cellValueToString(row.firstOrNull?.value);
+      if (keyText == null || keyText.trim().isEmpty) continue;
 
-      final String description =
-          _cellValueToString(row[1]?.value) ?? '';
+      final String description = row.length > 1
+          ? _cellValueToString(row[1]?.value) ?? ''
+          : '';
 
-      for (var c = firstTranslationIndex; c < row.length; c++) {
-        final String? rawText = _cellValueToString(row[c]?.value);
+      for (final entry in arbs.entries) {
+        final String? rawText = entry.key < row.length
+            ? _cellValueToString(row[entry.key]?.value)
+            : null;
         if (rawText?.trim().isEmpty ?? true) continue;
 
-        final text = rawText!.replaceAll('\r', '').replaceAll('\n', r'\n');
-        final placeholders = _extractPlaceholders(text);
+        final text = rawText!;
+        final placeholders = extractIcuPlaceholders(text);
 
-        arbs[c - firstTranslationIndex].translations.add(
+        entry.value.translations.add(
           Translation(
             key: keyText,
             translation: text,
-            description: description.replaceAll('\r', '').replaceAll('\n', r'\n'),
+            description: description,
             placeholders: placeholders,
           ),
         );
       }
     }
 
-    return arbs;
+    return arbs.values.toList();
   }
 
-  List<String> _extractPlaceholders(String text) {
-    final exp = RegExp(
-      r'\{(\w+)(?:\}|,\s*(?:plural|select|selectordinal)\s*,)',
-    );
-    // A placeholder can occur in the ICU selector and in several branches.
-    return exp.allMatches(text).map((m) => m.group(1)!).toSet().toList();
-  }
+  Map<int, String> _getLocaleColumns(Sheet sheet) {
+    final header = sheet.rows.firstOrNull;
+    if (header == null) return {};
 
-  List<Arb> _createEmptyArbs(Sheet sheet, int firstTranslationIndex) {
-    return [
-      for (var i = firstTranslationIndex; i < sheet.rows.first.length; i++)
-        if (_cellValueToString(sheet.rows.first[i]?.value) != null)
-          Arb(locale: _cellValueToString(
-              sheet.rows.first[i]?.value)!,
-              translations: [],
-          ),
-    ];
+    final locales = <int, String>{};
+    for (var column = firstTranslationIndex; column < header.length; column++) {
+      final locale = _cellValueToString(header[column]?.value)?.trim();
+      if (locale != null && locale.isNotEmpty) {
+        locales[column] = locale;
+      }
+    }
+    return locales;
   }
 
   Sheet? _getExcelSheet(String filePath) {

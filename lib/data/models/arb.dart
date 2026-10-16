@@ -1,27 +1,25 @@
+import 'dart:convert';
+
 import 'package:arber/data/models/translation.dart';
 
 class Arb {
   final String locale;
   final List<Translation> translations;
 
-  const Arb({
-    required this.locale,
-    this.translations = const [],
-  });
+  const Arb({required this.locale, this.translations = const []});
 
   String toJson() {
-    String localeString = '  "@@locale": "$locale"';
-    String translationsString = '';
+    final buffer = StringBuffer('{\n  "@@locale": ${jsonEncode(locale)}');
 
-    translations.removeWhere((t) => t.translation.isEmpty);
-    
-    for (Translation translation in translations) {
-      String ts = translation.toJson(translation == translations.last);
-      translationsString += '$ts\n';
+    // Encode entries separately so duplicate Excel keys stay visible in ARB.
+    for (final translation in translations) {
+      if (translation.translation.isEmpty) continue;
+      buffer
+        ..write(',\n')
+        ..write(translation.toJson(true));
     }
 
-    return translationsString.isEmpty
-        ? '{\n$localeString\n}'
-        : '{\n$localeString,\n$translationsString}';
+    buffer.write('\n}');
+    return buffer.toString();
   }
 }

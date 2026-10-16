@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Translation {
   final String key;
   final String translation;
@@ -12,18 +14,17 @@ class Translation {
   });
 
   String toJson(bool isLast) {
-    String translationRow = '  "$key": "$translation"';
-    String descriptionRow = '  "@$key": {\n    "description": "$description"';
+    final metadata = const JsonEncoder.withIndent('  ')
+        .convert({
+          'description': description,
+          if (placeholders.isNotEmpty)
+            'placeholders': {
+              for (final name in placeholders) name: <String, dynamic>{},
+            },
+        })
+        .replaceAll('\n', '\n  ');
 
-    if (placeholders.isNotEmpty) {
-      String placeholdersRow = '${placeholders.map((p) => '      "$p": {}')
-          .join(',\n')}\n';
-      descriptionRow += ',\n    "placeholders": {\n$placeholdersRow    }';
-    }
-
-    descriptionRow += '\n  }';
-    String coma = isLast ? '' : ',';
-
-    return '$translationRow,\n$descriptionRow$coma';
+    return '  ${jsonEncode(key)}: ${jsonEncode(translation)},\n'
+        '  ${jsonEncode('@$key')}: $metadata${isLast ? '' : ','}';
   }
 }

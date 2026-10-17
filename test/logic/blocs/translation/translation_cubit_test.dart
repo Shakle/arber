@@ -6,7 +6,7 @@ import 'package:arber/logic/blocs/arb/arb_cubit.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
 import 'package:arber/logic/blocs/translation/translation_cubit.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
-import 'package:excel/excel.dart';
+import 'package:excel_community/excel_community.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 

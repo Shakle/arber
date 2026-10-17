@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:excel/excel.dart';
+import 'package:excel_community/excel_community.dart';
 import 'package:arber/data/models/arb.dart';
 import 'package:arber/data/models/arb_data.dart';
 import 'package:arber/data/models/missing_translation.dart';
@@ -20,7 +20,8 @@ class ArbService {
       throw Exception('Excel file can\'t be read');
     }
 
-    final excelTranslationKeys = _getExcelTranslationKeys(sheet);
+    final rows = sheet.rows;
+    final excelTranslationKeys = _getExcelTranslationKeys(rows);
     final List<String> missingKeys = arbPath.isNotEmpty
         ? _getArbTranslationKeys(arbPath)
               .where((k) => !excelTranslationKeys.contains(k))
@@ -29,16 +30,16 @@ class ArbService {
 
     return ArbData(
       missingKeys: missingKeys,
-      missingTranslations: _getMissingTranslations(sheet),
+      missingTranslations: _getMissingTranslations(rows),
     );
   }
 
-  List<MissingTranslation> _getMissingTranslations(Sheet sheet) {
+  List<MissingTranslation> _getMissingTranslations(List<List<Data?>> rows) {
     final List<MissingTranslation> missingTranslations = [];
-    final locales = _getLocaleColumns(sheet);
+    final locales = _getLocaleColumns(rows);
 
     // Skip header row
-    for (var row in sheet.rows.skip(1)) {
+    for (var row in rows.skip(1)) {
       final String? keyText = _cellValueToString(row.firstOrNull?.value);
       if (keyText?.trim().isEmpty ?? true) continue;
 
@@ -65,13 +66,13 @@ class ArbService {
     return missingTranslations;
   }
 
-  List<String> _getExcelTranslationKeys(Sheet sheet) {
-    return sheet.rows
+  Set<String> _getExcelTranslationKeys(List<List<Data?>> rows) {
+    return rows
         .skip(1)
         .map((row) => _cellValueToString(row.firstOrNull?.value))
         .where((key) => key != null && key.trim().isNotEmpty)
         .cast<String>()
-        .toList();
+        .toSet();
   }
 
   List<String> _getArbTranslationKeys(String arbFilePath) {
@@ -87,12 +88,13 @@ class ArbService {
     final Sheet? sheet = _getExcelSheet(excelPath);
     if (sheet == null) return [];
 
+    final rows = sheet.rows;
     final arbs = {
-      for (final entry in _getLocaleColumns(sheet).entries)
+      for (final entry in _getLocaleColumns(rows).entries)
         entry.key: Arb(locale: entry.value, translations: []),
     };
 
-    for (var row in sheet.rows.skip(1)) {
+    for (var row in rows.skip(1)) {
       final String? keyText = _cellValueToString(row.firstOrNull?.value);
       if (keyText == null || keyText.trim().isEmpty) continue;
 
@@ -123,8 +125,8 @@ class ArbService {
     return arbs.values.toList();
   }
 
-  Map<int, String> _getLocaleColumns(Sheet sheet) {
-    final header = sheet.rows.firstOrNull;
+  Map<int, String> _getLocaleColumns(List<List<Data?>> rows) {
+    final header = rows.firstOrNull;
     if (header == null) return {};
 
     final locales = <int, String>{};

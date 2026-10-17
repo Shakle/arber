@@ -17,10 +17,7 @@ dependencies:
   rive: ^0.14.11
 
   file_picker: ^13.1.0
-  excel:
-    git:
-      url: https://github.com/justkawal/excel
-      ref: 37e0807f97fe8c293bdf75441cf21413b322882d
+  excel_community: ^2.6.0
 
   flutter_bloc: ^9.1.1
   shared_preferences: ^2.5.6

@@ -112,7 +112,10 @@ class ArbService {
             : null;
         if (rawText?.trim().isEmpty ?? true) continue;
 
-        final text = rawText!;
+        // Decode typed line breaks before JSON encoding, handling CRLF first.
+        final text = rawText!
+            .replaceAll(r'\r\n', '\r\n')
+            .replaceAll(r'\n', '\n');
         final placeholders = extractIcuPlaceholders(text);
 
         entry.value.translations.add(

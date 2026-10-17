@@ -38,7 +38,7 @@ void main() {
         final path = workbook([
           ['key', 'description', 'en'],
           ['hello', description, text],
-          ['literalNewline', '', r'Use \n to insert a newline'],
+          ['literalBackslashes', '', r'Path: C:\temp\file'],
         ]);
 
         final arb = ArbService().getArbs(path).single;
@@ -47,9 +47,56 @@ void main() {
         expect(arb.translations.first.translation, text);
         expect(decoded['hello'], text);
         expect(decoded['@hello']['description'], description);
-        expect(decoded['literalNewline'], r'Use \n to insert a newline');
+        expect(decoded['literalBackslashes'], r'Path: C:\temp\file');
       },
     );
+
+    test('imports typed newline escapes as line breaks in IEC messages', () {
+      const key = 'differentEqipmentNumberForIecPhrase';
+      const messages = {
+        'en': r'Your provided IEC 61406 ID\n{userIec}\nis related to a different equipment number\n{otherEquipmentNumber}',
+        'ar': r'معرّف IEC 61406 الذي أدخلته\n{userIec}\nمرتبط برقم معدّة آخر:\n{otherEquipmentNumber}',
+      };
+      const expected = {
+        'en': 'Your provided IEC 61406 ID\n{userIec}\nis related to a different equipment number\n{otherEquipmentNumber}',
+        'ar': 'معرّف IEC 61406 الذي أدخلته\n{userIec}\nمرتبط برقم معدّة آخر:\n{otherEquipmentNumber}',
+      };
+      final path = workbook([
+        ['key', 'description', ...messages.keys],
+        [key, '', ...messages.values],
+      ]);
+
+      for (final arb in ArbService().getArbs(path)) {
+        final json = arb.toJson();
+        final decoded = jsonDecode(json) as Map<String, dynamic>;
+
+        expect(decoded[key], expected[arb.locale]);
+        expect(json, isNot(contains(r'\\n')));
+        expect(arb.translations.single.placeholders, [
+          'userIec',
+          'otherEquipmentNumber',
+        ]);
+      }
+    });
+
+    test('imports typed Windows line breaks in an address', () {
+      const input = r'BASF SE\r\nCarl-Bosch-Strasse 38\r\n';
+      const expected = 'BASF SE\r\nCarl-Bosch-Strasse 38\r\n';
+      final path = workbook([
+        ['key', 'description', 'en'],
+        ['address', '', input],
+      ]);
+
+      final arb = ArbService().getArbs(path).single;
+      final json = arb.toJson();
+      final decoded = jsonDecode(json) as Map<String, dynamic>;
+
+      expect(arb.translations.single.translation, expected);
+      expect(decoded['address'], expected);
+      expect(json, contains(r'BASF SE\r\nCarl-Bosch-Strasse 38\r\n'));
+      expect(json, isNot(contains(r'\\r')));
+      expect(json, isNot(contains(r'\\n')));
+    });
 
     test('preserves duplicate Excel keys in the generated ARB', () {
       final path = workbook([

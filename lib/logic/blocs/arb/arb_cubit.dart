@@ -1,6 +1,5 @@
 import 'dart:isolate';
 
-import 'package:arber/data/models/arb.dart';
 import 'package:arber/services/arb_service.dart';
 import 'package:arber/services/file_service.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
@@ -12,25 +11,32 @@ part 'arb_state.dart';
 class ArbCubit extends Cubit<ArbState> {
   ArbCubit() : super(ArbInitial());
 
-  final FileService _fileService = FileService();
-
-  void reset() => emit(ArbInitial());
+  void reset() {
+    if (isClosed || state is ArbGenerating) return;
+    emit(ArbInitial());
+  }
 
   Future<void> generateARBs(String excelPath, String l10nPath) async {
+    if (isClosed || state is ArbGenerating) return;
+    final activity = beginDashActivity();
     try {
-      dashAnimationNotifier.value = DashAnimationState.slowDance;
       emit(ArbGenerating());
 
-      final List<Arb> arbs = await Isolate.run(
-        () => ArbService().getArbs(excelPath),
-      );
-
-      await _fileService.writeArbFiles(l10nPath, arbs);
-      emit(ArbDone());
+      await _generateArbFiles(excelPath, l10nPath);
+      if (!isClosed) emit(ArbDone());
     } catch (e) {
-      emit(ArbFailed(e));
+      if (!isClosed) emit(ArbFailed(e));
     } finally {
-      dashAnimationNotifier.value = DashAnimationState.idle;
+      endDashActivity(activity);
     }
   }
+}
+
+// Keep the worker closure outside the Cubit so it only captures path strings.
+Future<void> _generateArbFiles(String excelPath, String l10nPath) {
+  return Isolate.run(() async {
+    final arbs = ArbService().getArbs(excelPath);
+    // Serialization and synchronous file operations must stay in this isolate.
+    await FileService().writeArbFiles(l10nPath, arbs);
+  }, debugName: 'arber.generateArbs');
 }

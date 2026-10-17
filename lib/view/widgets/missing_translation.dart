@@ -1,3 +1,4 @@
+import 'package:arber/data/models/arb_data.dart';
 import 'package:arber/data/models/missing_translation.dart';
 import 'package:arber/logic/blocs/path/path_cubit.dart';
 import 'package:arber/logic/blocs/translation/translation_cubit.dart';
@@ -15,9 +16,9 @@ class MissingTranslationWindow extends StatelessWidget {
     return BlocBuilder<PathCubit, PathState>(
       builder: (context, state) {
         return AnimatedOpacity(
-            duration: const Duration(milliseconds: 250),
-            opacity: state is PathConnected ? 1 : 0,
-            child: translationsLayout()
+          duration: const Duration(milliseconds: 250),
+          opacity: state is PathConnected ? 1 : 0,
+          child: translationsLayout(),
         );
       },
     );
@@ -25,40 +26,37 @@ class MissingTranslationWindow extends StatelessWidget {
 
   Widget translationsLayout() {
     return Builder(
-        builder: (context) {
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 700,
-                maxHeight: 400,
-              ),
-              child: Stack(
-                children: [
-                  BackgroundField(
-                    borderRadius: allRoundBorderRadius,
-                    padding: const EdgeInsets.only(top: 40),
+      builder: (context) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 700, maxHeight: 400),
+            child: Stack(
+              children: [
+                BackgroundField(
+                  borderRadius: allRoundBorderRadius,
+                  padding: const EdgeInsets.only(top: 40),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: translationsList(),
+                  ),
+                ),
+                Align(
+                  alignment: const Alignment(1, -1),
+                  child: Material(
+                    type: MaterialType.transparency,
                     child: SizedBox(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: translationsList(),
+                      width: 60,
+                      height: 60,
+                      child: refreshButton(context),
                     ),
                   ),
-                  Align(
-                    alignment: const Alignment(1, -1),
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: refreshButton(context),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        }
+          ),
+        );
+      },
     );
   }
 
@@ -70,20 +68,21 @@ class MissingTranslationWindow extends StatelessWidget {
         }
 
         if (state is TranslationDone) {
-          if (state.arbData.missingKeys.isNotEmpty
-              || state.arbData.missingTranslations.isNotEmpty) {
+          final data = state.arbData;
+          if (state.arbData.missingKeys.isNotEmpty ||
+              state.arbData.missingTranslations.isNotEmpty) {
             return Padding(
               padding: const EdgeInsets.only(top: 20, bottom: 10),
-              child: ListView(
-                padding: const EdgeInsets.only(
-                  left: 40,
-                  right: 40,
-                  bottom: 30,
-                ),
-                children: [
-                  ...keysMissingWidgets(state),
-                  ...translationsMissingWidgets(state),
-                ],
+              child: ListView.builder(
+                padding: const EdgeInsets.only(left: 40, right: 40, bottom: 30),
+                itemCount:
+                    (data.missingKeys.isEmpty
+                        ? 0
+                        : data.missingKeys.length + 3) +
+                    (data.missingTranslations.isEmpty
+                        ? 0
+                        : data.missingTranslations.length + 2),
+                itemBuilder: (context, index) => _resultRow(data, index),
               ),
             );
           } else {
@@ -107,80 +106,65 @@ class MissingTranslationWindow extends StatelessWidget {
     );
   }
 
-  List<Widget> keysMissingWidgets(TranslationDone state) {
-    return [
-      if (state.arbData.missingKeys.isNotEmpty)
-        missingTranslationKeysTitle(),
-      if (state.arbData.missingKeys.isNotEmpty)
-        const SizedBox(height: 20),
-      if (state.arbData.missingKeys.isNotEmpty)
-        ...List.generate(state.arbData.missingKeys.length,
-                (index) =>
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: SelectableText(
-                    state.arbData.missingKeys[index],
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-                )),
-      if (state.arbData.missingKeys.isNotEmpty)
-        const SizedBox(height: 15),
-    ];
-  }
+  Widget _resultRow(ArbData data, int index) {
+    final keyCount = data.missingKeys.length;
+    if (keyCount > 0) {
+      if (index == 0) return missingTranslationKeysTitle();
+      if (index == 1) return const SizedBox(height: 20);
+      if (index < keyCount + 2) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: SelectableText(
+            data.missingKeys[index - 2],
+            style: const TextStyle(color: Colors.black87),
+          ),
+        );
+      }
+      if (index == keyCount + 2) return const SizedBox(height: 15);
+      index -= keyCount + 3;
+    }
 
-  List<Widget> translationsMissingWidgets(TranslationDone state) {
-    return [
-      if (state.arbData.missingTranslations.isNotEmpty)
-        missingTranslationsTitle(),
-      if (state.arbData.missingTranslations.isNotEmpty)
-        const SizedBox(height: 20),
-      if (state.arbData.missingTranslations.isNotEmpty)
-        ...List.generate(state.arbData.missingTranslations.length,
-                (index) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: missingTranslation(
-                state.arbData.missingTranslations[index],
-              ),
-            )),
-    ];
+    if (index == 0) return missingTranslationsTitle();
+    if (index == 1) return const SizedBox(height: 20);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: missingTranslation(data.missingTranslations[index - 2]),
+    );
   }
 
   Widget missingTranslation(MissingTranslation missingTranslation) {
     return RichText(
       text: TextSpan(
-          style: const TextStyle(color: Colors.black87),
-          children: <TextSpan>[
-            TextSpan(text: missingTranslation.key,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const TextSpan(
-              text: ' - ',
-            ),
-            ...List.generate(missingTranslation.missingTranslations.length,
-                  (index) {
-              if (missingTranslation.missingTranslations[index]
-                  == missingTranslation.missingTranslations.last) {
-                return TextSpan(
-                  text: '${missingTranslation.missingTranslations[index]}.',
-                  style: const TextStyle(color: Colors.black54),
-                );
-              } else {
-                return TextSpan(
-                  text: '${missingTranslation.missingTranslations[index]}, ',
-                  style: const TextStyle(color: Colors.black54),
-                );
-              }},
-            ),
-          ],
+        style: const TextStyle(color: Colors.black87),
+        children: <TextSpan>[
+          TextSpan(
+            text: missingTranslation.key,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const TextSpan(text: ' - '),
+          ...List.generate(missingTranslation.missingTranslations.length, (
+            index,
+          ) {
+            if (missingTranslation.missingTranslations[index] ==
+                missingTranslation.missingTranslations.last) {
+              return TextSpan(
+                text: '${missingTranslation.missingTranslations[index]}.',
+                style: const TextStyle(color: Colors.black54),
+              );
+            } else {
+              return TextSpan(
+                text: '${missingTranslation.missingTranslations[index]}, ',
+                style: const TextStyle(color: Colors.black54),
+              );
+            }
+          }),
+        ],
       ),
     );
   }
 
   Widget errorTranslationsText(String text) {
-    return SelectableText(
-      text,
-      textAlign: TextAlign.center,
-    );
+    return SelectableText(text, textAlign: TextAlign.center);
   }
 
   Widget missingTranslationKeysTitle() {
@@ -190,6 +174,7 @@ class MissingTranslationWindow extends StatelessWidget {
       style: TextStyle(fontWeight: FontWeight.w600),
     );
   }
+
   Widget missingTranslationsTitle() {
     return const Text(
       'Missing translations in Excel:',
@@ -197,7 +182,6 @@ class MissingTranslationWindow extends StatelessWidget {
       style: TextStyle(fontWeight: FontWeight.w600),
     );
   }
-
 
   Widget translationsAreNotChecked() {
     return const Center(
@@ -215,10 +199,7 @@ class MissingTranslationWindow extends StatelessWidget {
     return const Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Text(
-          'Checking translations..',
-          textAlign: TextAlign.center,
-        ),
+        child: Text('Checking translations..', textAlign: TextAlign.center),
       ),
     );
   }
@@ -245,16 +226,11 @@ class MissingTranslationWindow extends StatelessWidget {
         return Align(
           child: IconButton(
             onPressed: () {
-              context.read<TranslationCubit>()
-                  .checkArbExcelDifference();
+              context.read<TranslationCubit>().checkArbExcelDifference();
             },
             icon: const Tooltip(
               message: 'Check missing translations',
-              child: Icon(
-                Icons.refresh_rounded,
-                color: smoothBlue,
-                size: 28,
-              ),
+              child: Icon(Icons.refresh_rounded, color: smoothBlue, size: 28),
             ),
           ),
         );
@@ -267,10 +243,7 @@ class MissingTranslationWindow extends StatelessWidget {
       child: SizedBox(
         height: 17,
         width: 17,
-        child: CircularProgressIndicator(
-          strokeWidth: 3,
-          color: smoothBlue,
-        ),
+        child: CircularProgressIndicator(strokeWidth: 3, color: smoothBlue),
       ),
     );
   }

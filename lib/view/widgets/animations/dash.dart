@@ -15,6 +15,21 @@ enum DashAnimationState {
 }
 
 final dashAnimationNotifier = ValueNotifier(DashAnimationState.idle);
+final _activeDashActivities = <Object>{};
+
+Object beginDashActivity() {
+  final activity = Object();
+  _activeDashActivities.add(activity);
+  dashAnimationNotifier.value = DashAnimationState.slowDance;
+  return activity;
+}
+
+void endDashActivity(Object activity) {
+  if (!_activeDashActivities.remove(activity)) return;
+  dashAnimationNotifier.value = _activeDashActivities.isEmpty
+      ? DashAnimationState.idle
+      : DashAnimationState.slowDance;
+}
 
 class DashAnimation extends StatefulWidget {
   const DashAnimation({

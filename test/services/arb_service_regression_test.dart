@@ -95,6 +95,46 @@ void main() {
   });
 
   group('ARB comparison', () {
+    test('compares message keys in both directions and skips metadata', () {
+      final path = workbook([
+        ['key', 'description', 'en'],
+        ['shared', '', 'Shared'],
+        ['excelOnly', '', 'Excel only'],
+        ['excelOnly', '', 'Duplicate row'],
+      ]);
+      final source = File('${directory.path}/source.arb')
+        ..writeAsStringSync(
+          jsonEncode({
+            '@@locale': 'en',
+            'shared': 'Shared',
+            'arbOnly': 'ARB only',
+            '@excelOnly': {'description': 'Metadata is not a message'},
+          }),
+        );
+
+      final result = ArbService().getArbExcelDifference([path, source.path]);
+
+      expect(result.arbCompared, isTrue);
+      expect(result.missingKeys, ['arbOnly']);
+      expect(result.missingArbKeys, ['excelOnly']);
+      expect(result.missingTranslations, isEmpty);
+    });
+
+    test(
+      'does not report every Excel key as missing when no ARB is selected',
+      () {
+        final path = workbook([
+          ['key', 'description', 'en'],
+          ['hello', '', 'Hello'],
+        ]);
+        final result = ArbService().getArbExcelDifference([path, '']);
+
+        expect(result.arbCompared, isFalse);
+        expect(result.missingKeys, isEmpty);
+        expect(result.missingArbKeys, isEmpty);
+      },
+    );
+
     for (final indent in <String?>[null, '  ']) {
       test('reads top-level keys with JSON indentation $indent', () {
         final path = workbook([

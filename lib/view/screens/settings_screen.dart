@@ -3,6 +3,7 @@ import 'package:arber/theme/borders.dart';
 import 'package:arber/theme/colors.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
 import 'package:arber/view/widgets/background_field.dart';
+import 'package:arber/view/widgets/info_note.dart';
 import 'package:arber/view/widgets/buttons/app_back_button.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -49,14 +50,11 @@ class SettingsScreen extends StatelessWidget {
                 duration: const Duration(milliseconds: 250),
                 child: switch (state) {
                   UpdateChecked checked => layout(checked),
-                  UpdateDownloading(
-                      :double updatePercent,
-                  ) => downloadLayout(updatePercent),
-                  UpdateApplying() => applyingLayout(),
-                  UpdateError(:String message) => errorLayout(
-                    context,
-                    message,
+                  UpdateDownloading(:double updatePercent) => downloadLayout(
+                    updatePercent,
                   ),
+                  UpdateApplying() => applyingLayout(),
+                  UpdateError(:String message) => errorLayout(context, message),
                   _ => loading(),
                 },
               );
@@ -133,10 +131,7 @@ class SettingsScreen extends StatelessWidget {
             DashAnimation(initialAnimation: DashAnimationState.slowDance),
             Text('Installing...'),
             SizedBox(height: 5),
-            Text(
-              'Arber will restart in a moment',
-              textAlign: TextAlign.center,
-            ),
+            Text('Arber will restart in a moment', textAlign: TextAlign.center),
           ],
         ),
       ),
@@ -155,10 +150,6 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget layout(UpdateChecked state) {
-    final String newVersion = state.isNewerVersionAvailable
-        ? 'Available version: ${state.availableVersion}'
-        : 'No updates available';
-
     return SizedBox(
       width: double.infinity,
       child: BackgroundField(
@@ -169,7 +160,10 @@ class SettingsScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Current version: ${state.currentVersion}'),
-              Text(newVersion),
+              if (state.isNewerVersionAvailable)
+                Text('Available version: ${state.availableVersion}')
+              else
+                const InfoNote(message: 'No updates available'),
 
               if (state.isUpdateAvailable) ...[
                 const SizedBox(height: 20),

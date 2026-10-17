@@ -7,11 +7,13 @@ class BackgroundField extends StatelessWidget {
     required this.borderRadius,
     required this.child,
     this.padding = const EdgeInsets.all(40),
+    this.clipBehavior = Clip.none,
   });
 
   final Widget child;
   final BorderRadius borderRadius;
   final EdgeInsetsGeometry padding;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -21,18 +23,14 @@ class BackgroundField extends StatelessWidget {
   Widget field() {
     return Container(
       decoration: BoxDecoration(
-        boxShadow: const [
-          lightShadow,
-        ],
+        boxShadow: const [lightShadow],
         borderRadius: borderRadius,
       ),
       child: Material(
         borderRadius: borderRadius,
-          color: Colors.white,
-          child: Padding(
-            padding: padding,
-            child: child,
-          ),
+        clipBehavior: clipBehavior,
+        color: Colors.white,
+        child: Padding(padding: padding, child: child),
       ),
     );
   }

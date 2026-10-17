@@ -14,150 +14,276 @@ class MissingTranslationWindow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PathCubit, PathState>(
-      builder: (context, state) {
-        return AnimatedOpacity(
-          duration: const Duration(milliseconds: 250),
-          opacity: state is PathConnected ? 1 : 0,
-          child: translationsLayout(),
+      builder: (context, pathState) {
+        return BlocBuilder<TranslationCubit, TranslationState>(
+          builder: (context, translationState) {
+            final paths = context.read<PathCubit>();
+            // PathState can lag behind text changes while paths are being saved.
+            final visible =
+                pathState is PathConnected &&
+                paths.excelFilePathController.text.isNotEmpty &&
+                paths.l10nDirPathController.text.isNotEmpty;
+            return _FadingTranslationCard(
+              visible: visible,
+              state: translationState,
+              builder: (state) => _TranslationReport(state: state),
+            );
+          },
         );
       },
     );
   }
+}
 
-  Widget translationsLayout() {
+class _TranslationReport extends StatefulWidget {
+  const _TranslationReport({required this.state});
+
+  final TranslationState state;
+
+  @override
+  State<_TranslationReport> createState() => _TranslationReportState();
+}
+
+class _TranslationReportState extends State<_TranslationReport> {
+  bool _showArb = false;
+
+  @override
+  Widget build(BuildContext context) => translationsLayout(widget.state);
+
+  Widget translationsLayout(TranslationState state) {
     return Builder(
       builder: (context) {
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 700, maxHeight: 400),
-            child: Stack(
-              children: [
-                BackgroundField(
-                  borderRadius: allRoundBorderRadius,
-                  padding: const EdgeInsets.only(top: 40),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: translationsList(),
-                  ),
-                ),
-                Align(
-                  alignment: const Alignment(1, -1),
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: refreshButton(context),
+            child: BackgroundField(
+              borderRadius: allRoundBorderRadius,
+              clipBehavior: Clip.antiAlias,
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  _header(context, state),
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      transitionBuilder: (child, animation) => FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0.025, 0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                      ),
+                      child: KeyedSubtree(
+                        key: ValueKey(_showArb),
+                        child: translationsList(state),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget translationsList() {
-    return BlocBuilder<TranslationCubit, TranslationState>(
-      builder: (context, state) {
-        if (state is TranslationGenerating) {
-          return checkingText();
-        }
-
-        if (state is TranslationDone) {
-          final data = state.arbData;
-          if (state.arbData.missingKeys.isNotEmpty ||
-              state.arbData.missingTranslations.isNotEmpty) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 10),
-              child: ListView.builder(
-                padding: const EdgeInsets.only(left: 40, right: 40, bottom: 30),
-                itemCount:
-                    (data.missingKeys.isEmpty
-                        ? 0
-                        : data.missingKeys.length + 3) +
-                    (data.missingTranslations.isEmpty
-                        ? 0
-                        : data.missingTranslations.length + 2),
-                itemBuilder: (context, index) => _resultRow(data, index),
+                ],
               ),
-            );
-          } else {
-            return allFineText();
-          }
-        }
-
-        if (state is TranslationError) {
-          return Container(
-            padding: const EdgeInsets.only(top: 10),
-            alignment: Alignment.center,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: errorTranslationsText(state.errorMessage),
             ),
-          );
-        }
-
-        return translationsAreNotChecked();
+          ),
+        );
       },
     );
   }
 
-  Widget _resultRow(ArbData data, int index) {
-    final keyCount = data.missingKeys.length;
-    if (keyCount > 0) {
-      if (index == 0) return missingTranslationKeysTitle();
-      if (index == 1) return const SizedBox(height: 20);
-      if (index < keyCount + 2) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: SelectableText(
-            data.missingKeys[index - 2],
-            style: const TextStyle(color: Colors.black87),
+  Widget _header(BuildContext context, TranslationState state) {
+    var title = _showArb ? 'Missing keys in ARB' : 'Translation check';
+    if (state is TranslationGenerating) {
+      title = _showArb ? 'Comparing ARB…' : 'Checking translations…';
+    } else if (!_showArb &&
+        state is TranslationDone &&
+        state.arbData.missingTranslations.isNotEmpty) {
+      title = 'Missing translations in Excel';
+    }
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: IconButton(
+              tooltip: _showArb
+                  ? 'Show missing translations'
+                  : 'Show ARB comparison',
+              onPressed: () => setState(() => _showArb = !_showArb),
+              constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+              padding: const EdgeInsets.all(8),
+              icon: Icon(
+                _showArb
+                    ? Icons.compare_arrows_rounded
+                    : Icons.translate_rounded,
+                size: 20,
+                color: smoothBlue,
+              ),
+            ),
           ),
-        );
-      }
-      if (index == keyCount + 2) return const SizedBox(height: 15);
-      index -= keyCount + 3;
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(width: 36, height: 36, child: refreshButton(context, state)),
+        ],
+      ),
+    );
+  }
+
+  Widget translationsList(TranslationState state) {
+    final showArb = _showArb;
+    if (showArb &&
+        context.read<PathCubit>().arbFilePathController.text.trim().isEmpty) {
+      return _statusText(
+        'No reference ARB selected',
+        'Select an ARB to compare keys with Excel',
+      );
+    }
+    if (state is TranslationGenerating) {
+      return const SizedBox.shrink();
     }
 
-    if (index == 0) return missingTranslationsTitle();
-    if (index == 1) return const SizedBox(height: 20);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: missingTranslation(data.missingTranslations[index - 2]),
+    if (state is TranslationDone) {
+      final data = state.arbData;
+      if (showArb && !data.arbCompared) {
+        return _statusText(
+          'Not compared yet',
+          'Refresh to compare ARB with Excel',
+        );
+      }
+      final itemCount = showArb
+          ? data.missingKeys.length +
+                data.missingArbKeys.length +
+                (data.missingKeys.isEmpty ? 0 : 1) +
+                (data.missingKeys.isNotEmpty && data.missingArbKeys.isNotEmpty
+                    ? 1
+                    : 0)
+          : data.missingTranslations.length;
+      if (itemCount > 0) {
+        return Stack(
+          children: [
+            ListView.builder(
+              key: ValueKey(showArb),
+              padding: const EdgeInsets.fromLTRB(32, 12, 32, 0),
+              itemCount: itemCount,
+              itemBuilder: (context, index) => showArb
+                  ? _comparisonRow(data, index)
+                  : missingTranslation(data.missingTranslations[index]),
+            ),
+            _scrollFade(top: true),
+            _scrollFade(top: false),
+          ],
+        );
+      } else {
+        return showArb
+            ? _statusText('Keys match', 'ARB and Excel contain the same keys')
+            : allFineText();
+      }
+    }
+
+    if (state is TranslationError) {
+      return Container(
+        padding: const EdgeInsets.only(top: 10),
+        alignment: Alignment.center,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: errorTranslationsText(state.errorMessage),
+        ),
+      );
+    }
+
+    return translationsAreNotChecked();
+  }
+
+  Widget _scrollFade({required bool top}) {
+    return Positioned(
+      top: top ? 0 : null,
+      bottom: top ? null : 0,
+      left: 32,
+      right: 32,
+      height: 16,
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: top ? Alignment.topCenter : Alignment.bottomCenter,
+              end: top ? Alignment.bottomCenter : Alignment.topCenter,
+              colors: const [Colors.white, Color(0x00FFFFFF)],
+            ),
+          ),
+        ),
+      ),
     );
+  }
+
+  Widget _comparisonRow(ArbData data, int index) {
+    if (data.missingKeys.isEmpty) return _keyRow(data.missingArbKeys[index]);
+    if (data.missingKeys.isNotEmpty) {
+      if (index == 0) return _sectionTitle('Missing keys in Excel');
+      if (index <= data.missingKeys.length) {
+        return _keyRow(data.missingKeys[index - 1]);
+      }
+      index -= data.missingKeys.length + 1;
+    }
+    if (index == 0) return _sectionTitle('Missing keys in ARB');
+    return _keyRow(data.missingArbKeys[index - 1]);
+  }
+
+  Widget _keyRow(String key) {
+    return _reportRow(key);
   }
 
   Widget missingTranslation(MissingTranslation missingTranslation) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(color: Colors.black87),
-        children: <TextSpan>[
-          TextSpan(
-            text: missingTranslation.key,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+    return _reportRow(
+      missingTranslation.key,
+      locales: missingTranslation.missingTranslations,
+    );
+  }
+
+  Widget _reportRow(String key, {List<String>? locales}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Color(0x10000000), width: 0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SelectableText(
+            key,
+            style: const TextStyle(
+              fontSize: 12,
+              height: 1.4,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
           ),
-          const TextSpan(text: ' - '),
-          ...List.generate(missingTranslation.missingTranslations.length, (
-            index,
-          ) {
-            if (missingTranslation.missingTranslations[index] ==
-                missingTranslation.missingTranslations.last) {
-              return TextSpan(
-                text: '${missingTranslation.missingTranslations[index]}.',
-                style: const TextStyle(color: Colors.black54),
-              );
-            } else {
-              return TextSpan(
-                text: '${missingTranslation.missingTranslations[index]}, ',
-                style: const TextStyle(color: Colors.black54),
-              );
-            }
-          }),
+          if (locales != null && locales.isNotEmpty) ...[
+            const SizedBox(height: 3),
+            SelectableText(
+              locales.join(' · '),
+              style: const TextStyle(
+                fontSize: 11,
+                height: 1.4,
+                color: Colors.black45,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -167,39 +293,53 @@ class MissingTranslationWindow extends StatelessWidget {
     return SelectableText(text, textAlign: TextAlign.center);
   }
 
-  Widget missingTranslationKeysTitle() {
-    return const Text(
-      'Missing keys in Excel:',
-      textAlign: TextAlign.center,
-      style: TextStyle(fontWeight: FontWeight.w600),
-    );
-  }
-
-  Widget missingTranslationsTitle() {
-    return const Text(
-      'Missing translations in Excel:',
-      textAlign: TextAlign.center,
-      style: TextStyle(fontWeight: FontWeight.w600),
-    );
-  }
-
-  Widget translationsAreNotChecked() {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Text(
-          'Missing translations have not been checked yet',
-          textAlign: TextAlign.center,
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, top: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: Colors.black54,
         ),
       ),
     );
   }
 
-  Widget checkingText() {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Text('Checking translations..', textAlign: TextAlign.center),
+  Widget translationsAreNotChecked() {
+    return _statusText(
+      'Not checked yet',
+      _showArb
+          ? 'Refresh to compare ARB with Excel'
+          : 'Refresh to find missing translations',
+    );
+  }
+
+  Widget _statusText(String title, String hint) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              hint,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 11, color: Colors.black45),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -216,25 +356,21 @@ class MissingTranslationWindow extends StatelessWidget {
     );
   }
 
-  Widget refreshButton(BuildContext context) {
-    return BlocBuilder<TranslationCubit, TranslationState>(
-      builder: (context, state) {
-        if (state is TranslationGenerating) {
-          return loader();
-        }
+  Widget refreshButton(BuildContext context, TranslationState state) {
+    if (state is TranslationGenerating) {
+      return loader();
+    }
 
-        return Align(
-          child: IconButton(
-            onPressed: () {
-              context.read<TranslationCubit>().checkArbExcelDifference();
-            },
-            icon: const Tooltip(
-              message: 'Check missing translations',
-              child: Icon(Icons.refresh_rounded, color: smoothBlue, size: 28),
-            ),
-          ),
-        );
+    return IconButton(
+      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+      padding: const EdgeInsets.all(6),
+      onPressed: () {
+        context.read<TranslationCubit>().checkArbExcelDifference();
       },
+      icon: const Tooltip(
+        message: 'Check missing translations',
+        child: Icon(Icons.refresh_rounded, color: smoothBlue, size: 24),
+      ),
     );
   }
 
@@ -244,6 +380,68 @@ class MissingTranslationWindow extends StatelessWidget {
         height: 17,
         width: 17,
         child: CircularProgressIndicator(strokeWidth: 3, color: smoothBlue),
+      ),
+    );
+  }
+}
+
+class _FadingTranslationCard extends StatefulWidget {
+  const _FadingTranslationCard({
+    required this.visible,
+    required this.state,
+    required this.builder,
+  });
+
+  final bool visible;
+  final TranslationState state;
+  final Widget Function(TranslationState) builder;
+
+  @override
+  State<_FadingTranslationCard> createState() => _FadingTranslationCardState();
+}
+
+class _FadingTranslationCardState extends State<_FadingTranslationCard> {
+  late TranslationState _displayedState;
+  late bool _hidden;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayedState = widget.state;
+    _hidden = !widget.visible;
+  }
+
+  @override
+  void didUpdateWidget(_FadingTranslationCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Keep the previous report intact until the hide animation finishes.
+    if (widget.visible) {
+      _hidden = false;
+      _displayedState = widget.state;
+    } else if (_hidden) {
+      _displayedState = widget.state;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: !widget.visible,
+      child: ExcludeSemantics(
+        excluding: !widget.visible,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 250),
+          opacity: widget.visible ? 1 : 0,
+          onEnd: () {
+            if (!widget.visible) {
+              setState(() {
+                _hidden = true;
+                _displayedState = widget.state;
+              });
+            }
+          },
+          child: widget.builder(_displayedState),
+        ),
       ),
     );
   }

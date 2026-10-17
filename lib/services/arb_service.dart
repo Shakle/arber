@@ -22,15 +22,19 @@ class ArbService {
 
     final rows = sheet.rows;
     final excelTranslationKeys = _getExcelTranslationKeys(rows);
-    final List<String> missingKeys = arbPath.isNotEmpty
-        ? _getArbTranslationKeys(arbPath)
-              .where((k) => !excelTranslationKeys.contains(k))
-              .toList()
-        : <String>[];
+    final arbKeys = arbPath.isNotEmpty
+        ? _getArbTranslationKeys(arbPath).toSet()
+        : <String>{};
 
     return ArbData(
-      missingKeys: missingKeys,
+      missingKeys: arbKeys
+          .where((key) => !excelTranslationKeys.contains(key))
+          .toList(),
       missingTranslations: _getMissingTranslations(rows),
+      missingArbKeys: arbPath.isNotEmpty
+          ? excelTranslationKeys.where((key) => !arbKeys.contains(key)).toList()
+          : const [],
+      arbCompared: arbPath.isNotEmpty,
     );
   }
 

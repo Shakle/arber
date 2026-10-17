@@ -16,7 +16,7 @@ class AppTheme {
     return InputDecorationTheme(
       fillColor: Colors.grey.shade200,
       filled: true,
-      hintStyle: _hintTextStyle,
+      hintStyle: hintTextStyle,
       focusedBorder: _inputDecorationBorder,
       enabledBorder: _inputDecorationBorder,
       errorBorder: _inputDecorationBorder,
@@ -34,5 +34,6 @@ class AppTheme {
   }
 
   static TextStyle get inputTextStyle => const TextStyle(color: Colors.black54);
-  static TextStyle get _hintTextStyle => const TextStyle(color: Colors.black45);
+  static TextStyle get hintTextStyle =>
+      const TextStyle(fontSize: 12, color: Colors.black45);
 }

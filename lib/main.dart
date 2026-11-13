@@ -8,13 +8,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Future.wait([
-    windowManager.ensureInitialized(),
     PackageInfo.fromPlatform().then((info) => packageInfo = info),
     // Must run before anything reads preferences.
     PrefsMigrationService().migrate(),
@@ -24,22 +22,8 @@ void main() async {
     if (Platform.isMacOS) FilePicker.skipEntitlementsChecks(),
   ]);
 
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    WindowOptions windowOptions = WindowOptions(
-      minimumSize: const Size(1000, 700),
-      size: const Size(1050, 750),
-      center: true,
-      titleBarStyle: Platform.isMacOS
-          ? TitleBarStyle.hidden
-          : TitleBarStyle.normal,
-    );
-
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-  }
-
+  // The window's size, minimum size and title bar are set natively:
+  // macos/Runner/MainFlutterWindow.swift and windows/runner/main.cpp.
   runApp(BlocProvider(
     lazy: false,
     create: (context) => UpdateCubit(),

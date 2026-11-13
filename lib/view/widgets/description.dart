@@ -27,43 +27,102 @@ const _steps = [
   ),
 ];
 
+/// How much of the help card is shown, from 0 (hidden) to 1 (fully shown).
+final _helpVisibility = ValueNotifier<double>(0);
+
+/// Lightens everything painted below it while the help card is shown.
+class HelpScrim extends StatelessWidget {
+  const HelpScrim({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: ValueListenableBuilder(
+        valueListenable: _helpVisibility,
+        builder: (context, visibility, _) => ColoredBox(
+          color: Colors.white.withValues(alpha: 0.55 * visibility),
+        ),
+      ),
+    );
+  }
+}
+
 class Description extends StatelessWidget {
   const Description({super.key});
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-    return Tooltip(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: allRoundBorderRadius,
-        boxShadow: const [lightShadow],
-      ),
-      padding: const EdgeInsets.all(24),
-      margin: EdgeInsets.only(right: size.width * 0.08),
-      verticalOffset: 0,
-      ignorePointer: false,
+    return RawTooltip(
+      semanticsTooltip:
+          'How to use Arber. ${_steps.map((step) => '${step.title}. ${step.detail}').join(' ')}',
       enableTapToDismiss: false,
-      richMessage: TextSpan(
-        text: '',
-        semanticsLabel:
-            'How to use Arber. ${_steps.map((step) => '${step.title}. ${step.detail}').join(' ')}',
-        children: [
-          WidgetSpan(
-            child: SizedBox(
-              width: (size.width * 0.84 - 48).clamp(0.0, 360.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: (size.height - 112).clamp(0.0, double.infinity),
-                ),
-                child: const _Instructions(),
-              ),
-            ),
+      tooltipBuilder: (context, animation) => _HelpCard(
+        animation: animation,
+        child: Container(
+          width: (size.width * 0.84).clamp(0.0, 408.0),
+          constraints: BoxConstraints(
+            maxHeight: (size.height - 64).clamp(0.0, double.infinity),
           ),
-        ],
+          margin: EdgeInsets.only(right: size.width * 0.08),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: allRoundBorderRadius,
+            boxShadow: const [lightShadow],
+          ),
+          child: const _Instructions(),
+        ),
       ),
       child: SizedBox(height: size.height * 0.15, width: size.height * 0.16),
     );
+  }
+}
+
+/// Fades the card with the tooltip and mirrors its progress to [HelpScrim].
+class _HelpCard extends StatefulWidget {
+  const _HelpCard({required this.animation, required this.child});
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  State<_HelpCard> createState() => _HelpCardState();
+}
+
+class _HelpCardState extends State<_HelpCard> {
+  @override
+  void initState() {
+    super.initState();
+    widget.animation.addListener(_syncScrim);
+  }
+
+  @override
+  void didUpdateWidget(_HelpCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animation != widget.animation) {
+      oldWidget.animation.removeListener(_syncScrim);
+      widget.animation.addListener(_syncScrim);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.animation.removeListener(_syncScrim);
+    // The card normally fades out to 0 first; this covers it being torn down.
+    if (_helpVisibility.value != 0) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _helpVisibility.value = 0,
+      );
+    }
+    super.dispose();
+  }
+
+  void _syncScrim() => _helpVisibility.value = widget.animation.value;
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(opacity: widget.animation, child: widget.child);
   }
 }
 

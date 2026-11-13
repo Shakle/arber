@@ -34,6 +34,7 @@ void main() {
       'round-trips cell content without pre-escaping newlines or slashes',
       () {
         const text = 'Say "hello"\nC:\\temp\\file\tNext\r\nEnd';
+        const expected = 'Say "hello"\nC:\\temp\\file\tNext\nEnd';
         const description = 'Description "quoted"\nPath: C:\\temp';
         final path = workbook([
           ['key', 'description', 'en'],
@@ -44,8 +45,8 @@ void main() {
         final arb = ArbService().getArbs(path).single;
         final decoded = jsonDecode(arb.toJson()) as Map<String, dynamic>;
 
-        expect(arb.translations.first.translation, text);
-        expect(decoded['hello'], text);
+        expect(arb.translations.first.translation, expected);
+        expect(decoded['hello'], expected);
         expect(decoded['@hello']['description'], description);
         expect(decoded['literalBackslashes'], r'Path: C:\temp\file');
       },
@@ -79,9 +80,9 @@ void main() {
       }
     });
 
-    test('imports typed Windows line breaks in an address', () {
+    test('imports typed Windows line breaks in an address as \\n', () {
       const input = r'BASF SE\r\nCarl-Bosch-Strasse 38\r\n';
-      const expected = 'BASF SE\r\nCarl-Bosch-Strasse 38\r\n';
+      const expected = 'BASF SE\nCarl-Bosch-Strasse 38\n';
       final path = workbook([
         ['key', 'description', 'en'],
         ['address', '', input],
@@ -93,8 +94,8 @@ void main() {
 
       expect(arb.translations.single.translation, expected);
       expect(decoded['address'], expected);
-      expect(json, contains(r'BASF SE\r\nCarl-Bosch-Strasse 38\r\n'));
-      expect(json, isNot(contains(r'\\r')));
+      expect(json, contains(r'BASF SE\nCarl-Bosch-Strasse 38\n'));
+      expect(json, isNot(contains(r'\r')));
       expect(json, isNot(contains(r'\\n')));
     });
 

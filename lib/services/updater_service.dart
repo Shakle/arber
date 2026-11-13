@@ -1,14 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 /// Replaces the running application with a freshly downloaded build.
 ///
-/// The archive cannot be unpacked over a running app, so installation is done
-/// by a small detached helper script: it waits for this process to exit, swaps
-/// the bundle (keeping the old one aside for rollback) and starts the new
-/// version. The helper outlives the app on purpose.
+/// On Windows the files of a running app are locked, so a detached helper
+/// script waits for this process to exit, mirrors the new build over the
+/// install folder and starts it. On macOS this process swaps the bundles
+/// itself while it still runs ([swapBundle]), and the helper only reopens the
+/// app. The helper outlives the app on purpose.
 ///
 /// macOS note: this requires the app to run **without** App Sandbox, otherwise
-/// the helper inherits the sandbox and cannot touch `/Applications`.
+/// it cannot touch `/Applications`.
 class UpdaterService {
 
   /// Unpacks [archivePath] and hands control to the install helper. On success
@@ -29,21 +32,124 @@ class UpdaterService {
 
     await _ensureWritable(target);
 
+    if (Platform.isMacOS) {
+      await swapBundle(source: source, target: target);
+    }
+
     final File helper = await _writeHelper(
       staging: staging,
       source: source,
       target: target,
     );
 
-    await Process.start(
-      Platform.isWindows ? 'cmd.exe' : '/bin/sh',
-      Platform.isWindows ? ['/c', helper.path] : [helper.path],
-      mode: ProcessStartMode.detached,
-      workingDirectory: staging.path,
-    );
+    if (Platform.isWindows) {
+      // A detached process has no console, and the script starts robocopy
+      // hidden, so no console window shows up. The script goes in as
+      // -EncodedCommand: a script file is subject to the execution policy,
+      // which managed machines often restrict. install.ps1 stays for reference.
+      await Process.start(
+        'powershell.exe',
+        [
+          '-NoProfile',
+          '-NonInteractive',
+          '-WindowStyle',
+          'Hidden',
+          '-EncodedCommand',
+          encodePowerShellCommand(helper.readAsStringSync()),
+        ],
+        mode: ProcessStartMode.detached,
+        // Not the staging folder: the script deletes it once it is done.
+        workingDirectory: Directory.systemTemp.path,
+      );
+    } else {
+      await Process.start(
+        '/bin/sh',
+        [helper.path],
+        mode: ProcessStartMode.detached,
+        workingDirectory: staging.path,
+      );
+    }
 
-    // Hand the bundle over to the helper. Anything after this is unreachable.
+    // Hand over to the helper. Anything after this is unreachable.
     exit(0);
+  }
+
+  /// Puts the bundle at [source] in place of the bundle at [target], keeping
+  /// the old one at [previousBundlePath] until the new version deletes it on
+  /// start ([removePreviousVersion]).
+  ///
+  /// This runs in the app itself, before it quits: macOS lets an app replace
+  /// bundles signed by its own team. Done by a helper after the app has quit,
+  /// the change is not attributed to the app, and macOS stops it until the user
+  /// allows the app under App Management in Privacy & Security. Moving the
+  /// running app's bundle is safe: the process keeps the files it has open.
+  static Future<void> swapBundle({
+    required String source,
+    required String target,
+  }) async {
+    final Directory previous = Directory(previousBundlePath(target));
+    if (previous.existsSync()) previous.deleteSync(recursive: true);
+
+    await Directory(target).rename(previous.path);
+    try {
+      await _moveBundle(source: source, target: target);
+    } catch (e) {
+      // Put the working version back rather than leaving nothing installed.
+      final Directory partial = Directory(target);
+      if (partial.existsSync()) partial.deleteSync(recursive: true);
+      await previous.rename(target);
+      throw UpdaterException('Could not install the update.\n$e'.trim());
+    }
+
+    if (Platform.isMacOS) {
+      // An archive the app downloads itself has no quarantine flag, but clear
+      // it anyway, so that macOS does not ask before the first start.
+      await Process.run('/usr/bin/xattr', ['-dr', 'com.apple.quarantine', target]);
+    }
+  }
+
+  /// Renames [source] to [target], or copies it there when the two are on
+  /// different volumes (the staging folder is on the system one).
+  static Future<void> _moveBundle({
+    required String source,
+    required String target,
+  }) async {
+    try {
+      await Directory(source).rename(target);
+    } on FileSystemException {
+      // ditto keeps symlinks, permissions and the code signature intact.
+      final ProcessResult result = await Process.run('/usr/bin/ditto', [
+        source,
+        target,
+      ]);
+      if (result.exitCode != 0) {
+        throw UpdaterException('${result.stderr}'.trim());
+      }
+    }
+  }
+
+  /// Where [swapBundle] keeps the replaced bundle of [target].
+  static String previousBundlePath(String target) => '$target.old';
+
+  /// Deletes the bundle an update left next to this app ([swapBundle]). Run on
+  /// start: by now the old version has quit, and macOS lets the app delete a
+  /// bundle of its own team. Never throws.
+  static Future<void> removePreviousVersion() async {
+    if (!Platform.isMacOS) return;
+    try {
+      // <bundle>.app/Contents/MacOS/<executable>
+      final String bundle = File(Platform.resolvedExecutable).parent.parent.parent.path;
+      if (!bundle.endsWith('.app')) return;
+      await removePreviousBundle(bundle);
+    } catch (_) {
+      // Only disk space is at stake; the next start tries again.
+    }
+  }
+
+  /// [removePreviousVersion] for the bundle at [bundle].
+  static Future<void> removePreviousBundle(String bundle) async {
+    final Directory previous = Directory(previousBundlePath(bundle));
+    if (await previous.exists()) await previous.delete(recursive: true);
   }
 
   Future<void> _unpack(String archivePath, Directory destination) async {
@@ -154,11 +260,16 @@ class UpdaterService {
   }) async {
     final File helper = File(
       '${staging.path}${Platform.pathSeparator}'
-      '${Platform.isWindows ? 'install.bat' : 'install.sh'}',
+      '${Platform.isWindows ? 'install.ps1' : 'install.sh'}',
     )..writeAsStringSync(
       Platform.isWindows
-          ? _windowsHelper(source: source, target: target)
-          : _macosHelper(source: source, target: target),
+          ? windowsInstallScript(
+              appPid: pid,
+              source: source,
+              target: target,
+              staging: staging.path,
+            )
+          : _macosHelper(target: target),
     );
 
     if (!Platform.isWindows) {
@@ -168,58 +279,75 @@ class UpdaterService {
     return helper;
   }
 
-  String _macosHelper({required String source, required String target}) {
-    final String backup = '$target.old';
-
+  /// The new bundle is already in place ([swapBundle]): the helper only waits
+  /// for this process to quit and opens the new version. It must not touch any
+  /// bundle, or macOS would ask for App Management access.
+  String _macosHelper({required String target}) {
     return '''
 #!/bin/sh
-# Generated by arber's updater. Waits for the app to quit, then swaps bundles.
+# Generated by arber's updater. The app has already swapped its bundle: wait
+# for it to quit, then open the new version.
 PID=$pid
-SOURCE=${_shQuote(source)}
 TARGET=${_shQuote(target)}
-BACKUP=${_shQuote(backup)}
 
 while kill -0 "\$PID" 2>/dev/null; do sleep 0.2; done
-sleep 0.5
-
-rm -rf "\$BACKUP"
-mv "\$TARGET" "\$BACKUP" 2>/dev/null
-
-if ! mv "\$SOURCE" "\$TARGET"; then
-  # Put the working version back rather than leaving nothing installed.
-  mv "\$BACKUP" "\$TARGET" 2>/dev/null
-  open "\$TARGET"
-  exit 1
-fi
-
-rm -rf "\$BACKUP"
-xattr -dr com.apple.quarantine "\$TARGET" 2>/dev/null
 open "\$TARGET"
 ''';
   }
 
-  String _windowsHelper({required String source, required String target}) {
+  /// The PowerShell script that installs the update on Windows: waits for the
+  /// app ([appPid]) to quit, mirrors [source] over [target] and starts the new
+  /// version. It runs without a console, so it reports problems in a message
+  /// box and in `install.log` inside [staging], which it deletes on success.
+  static String windowsInstallScript({
+    required int appPid,
+    required String source,
+    required String target,
+    required String staging,
+  }) {
+    final String log = '$staging\\install.log';
+
     return '''
-@echo off
-rem Generated by arber's updater. Waits for the app to quit, then mirrors the
-rem new build over the install folder.
-set "PID=$pid"
-set "SOURCE=$source"
-set "TARGET=$target"
+# Generated by arber's updater. Runs without a console window: waits for the
+# app to quit, mirrors the new build over the install folder and starts it.
+\$ErrorActionPreference = 'Stop'
+\$appPid = $appPid
+\$source = ${_psQuote(source)}
+\$target = ${_psQuote(target)}
+\$staging = ${_psQuote(staging)}
+\$log = ${_psQuote(log)}
+\$app = Join-Path \$target '$_windowsExecutable'
 
-:wait
-tasklist /FI "PID eq %PID%" /NH 2>nul | findstr /R "[0-9]" >nul
-if %errorlevel%==0 (
-  rem ping is the reliable way to sleep without a console attached.
-  ping -n 2 127.0.0.1 >nul
-  goto wait
-)
+function Write-Log([string] \$message) {
+  try { Add-Content -LiteralPath \$log -Value "\$(Get-Date -Format o) \$message" } catch {}
+}
 
-robocopy "%SOURCE%" "%TARGET%" /MIR /NFL /NDL /NJH /NJS /NP >nul
-rem robocopy reports 0-7 for success, 8+ for real failures.
-if %errorlevel% GEQ 8 exit /b 1
+try {
+  Wait-Process -Id \$appPid -Timeout 60 -ErrorAction SilentlyContinue
+  Start-Sleep -Milliseconds 500
 
-start "" "%TARGET%\\$_windowsExecutable"
+  # By default robocopy retries a locked file a million times, 30 s apart, and
+  # an antivirus scanning the new files locks them for a moment: retry every
+  # second, 30 s in all.
+  \$copy = Start-Process -FilePath 'robocopy.exe' -WindowStyle Hidden -Wait -PassThru -ArgumentList @(
+    "`"\$source`"", "`"\$target`"", '/MIR', '/R:30', '/W:1', '/NP', "/LOG+:`"\$log`""
+  )
+  # robocopy reports 0-7 for success, 8 and above for failures.
+  if (\$copy.ExitCode -ge 8) {
+    throw "robocopy failed with exit code \$(\$copy.ExitCode)."
+  }
+
+  Start-Process -FilePath \$app
+  Write-Log 'Updated and restarted.'
+  Remove-Item -LiteralPath \$staging -Recurse -Force -ErrorAction SilentlyContinue
+} catch {
+  \$problem = \$_
+  Write-Log "Update failed: \$problem"
+  # Bring back whatever is installed rather than leaving no app at all.
+  try { Start-Process -FilePath \$app } catch {}
+  \$message = "Arber could not be updated.`n`n\$problem`n`nDetails: \$log"
+  try { (New-Object -ComObject WScript.Shell).Popup(\$message, 0, 'Arber update', 16) | Out-Null } catch {}
+}
 ''';
   }
 
@@ -228,6 +356,15 @@ start "" "%TARGET%\\$_windowsExecutable"
   static String _shQuote(String value) => "'${value.replaceAll("'", "'\\''")}'";
 
   static String _psQuote(String value) => "'${value.replaceAll("'", "''")}'";
+}
+
+/// [script] as PowerShell's `-EncodedCommand` expects it: base64 of UTF-16LE.
+String encodePowerShellCommand(String script) {
+  final ByteData bytes = ByteData(script.length * 2);
+  for (int i = 0; i < script.length; i++) {
+    bytes.setUint16(i * 2, script.codeUnitAt(i), Endian.little);
+  }
+  return base64Encode(bytes.buffer.asUint8List());
 }
 
 class UpdaterException implements Exception {

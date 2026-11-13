@@ -106,23 +106,14 @@ class _TranslationReportState extends State<_TranslationReport> {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          SizedBox(
-            width: 36,
-            height: 36,
-            child: IconButton(
-              tooltip: _showArb
-                  ? 'Show missing translations'
-                  : 'Show ARB comparison',
-              onPressed: () => setState(() => _showArb = !_showArb),
-              constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-              padding: const EdgeInsets.all(8),
-              icon: Icon(
-                _showArb
-                    ? Icons.compare_arrows_rounded
-                    : Icons.translate_rounded,
-                size: 20,
-                color: smoothBlue,
-              ),
+          _HeaderButton(
+            tooltip: _showArb
+                ? 'Show missing translations'
+                : 'Show ARB comparison',
+            onPressed: () => setState(() => _showArb = !_showArb),
+            child: Icon(
+              _showArb ? Icons.compare_arrows_rounded : Icons.translate_rounded,
+              size: 20,
             ),
           ),
           const SizedBox(width: 8),
@@ -137,7 +128,7 @@ class _TranslationReportState extends State<_TranslationReport> {
             ),
           ),
           const SizedBox(width: 8),
-          SizedBox(width: 36, height: 36, child: refreshButton(context, state)),
+          refreshButton(context, state),
         ],
       ),
     );
@@ -357,30 +348,53 @@ class _TranslationReportState extends State<_TranslationReport> {
   }
 
   Widget refreshButton(BuildContext context, TranslationState state) {
-    if (state is TranslationGenerating) {
-      return loader();
-    }
-
-    return IconButton(
-      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-      padding: const EdgeInsets.all(6),
-      onPressed: () {
-        context.read<TranslationCubit>().checkArbExcelDifference();
-      },
-      icon: const Tooltip(
-        message: 'Check missing translations',
-        child: Icon(Icons.refresh_rounded, color: smoothBlue, size: 24),
-      ),
+    final checking = state is TranslationGenerating;
+    return _HeaderButton(
+      tooltip: 'Check missing translations',
+      onPressed: checking
+          ? null
+          : () => context.read<TranslationCubit>().checkArbExcelDifference(),
+      child: checking
+          ? const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: smoothBlue,
+              ),
+            )
+          : const Icon(Icons.refresh_rounded, size: 22),
     );
   }
+}
 
-  Widget loader() {
-    return const Center(
-      child: SizedBox(
-        height: 17,
-        width: 17,
-        child: CircularProgressIndicator(strokeWidth: 3, color: smoothBlue),
+/// A round, tinted icon button for the report header.
+class _HeaderButton extends StatelessWidget {
+  const _HeaderButton({
+    required this.tooltip,
+    required this.onPressed,
+    required this.child,
+  });
+
+  final String tooltip;
+  final VoidCallback? onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final plate = smoothBlue.withValues(alpha: 0.12);
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        fixedSize: const Size.square(36),
+        minimumSize: const Size.square(36),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        backgroundColor: plate,
+        disabledBackgroundColor: plate,
+        foregroundColor: smoothBlue,
       ),
+      icon: child,
     );
   }
 }

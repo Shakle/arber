@@ -8,6 +8,7 @@ import 'package:arber/data/models/arb_data.dart';
 import 'package:arber/data/models/missing_translation.dart';
 import 'package:arber/data/models/translation.dart';
 import 'package:arber/services/icu_placeholder_parser.dart';
+import 'package:arber/services/line_breaks.dart';
 
 class ArbService {
   final int firstTranslationIndex = 2;
@@ -112,10 +113,7 @@ class ArbService {
             : null;
         if (rawText?.trim().isEmpty ?? true) continue;
 
-        // Decode typed line breaks before JSON encoding, handling CRLF first.
-        final text = rawText!
-            .replaceAll(r'\r\n', '\r\n')
-            .replaceAll(r'\n', '\n');
+        final text = decodeLineBreaks(rawText!);
         final placeholders = extractIcuPlaceholders(text);
 
         entry.value.translations.add(
@@ -152,8 +150,15 @@ class ArbService {
     return excel.tables[excel.tables.keys.first];
   }
 
-  /// Converts any CellValue subtype to its String representation.
+  /// The text of [cell], with every line break as `\n`, so that no CR read
+  /// from the sheet reaches the ARB files or the comparison.
   String? _cellValueToString(CellValue? cell) {
+    final text = _cellText(cell);
+    return text == null ? null : normalizeLineBreaks(text);
+  }
+
+  /// Converts any CellValue subtype to its String representation.
+  String? _cellText(CellValue? cell) {
     if (cell == null) return null;
     if (cell is TextCellValue) {
       return cell.value.text ?? '';

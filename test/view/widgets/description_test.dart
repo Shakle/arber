@@ -26,12 +26,31 @@ void main() {
         MaterialApp(
           theme: AppTheme.lightTheme,
           home: const Scaffold(
-            body: Align(alignment: Alignment.bottomRight, child: Description()),
+            body: Stack(
+              children: [
+                Positioned.fill(child: HelpScrim()),
+                Align(alignment: Alignment.bottomRight, child: Description()),
+              ],
+            ),
           ),
         ),
       );
-      tester.state<TooltipState>(find.byType(Tooltip)).ensureTooltipVisible();
+      double scrimAlpha() => tester
+          .widget<ColoredBox>(
+            find.descendant(
+              of: find.byType(HelpScrim),
+              matching: find.byType(ColoredBox),
+            ),
+          )
+          .color
+          .a;
+      expect(scrimAlpha(), 0);
+
+      tester
+          .state<RawTooltipState>(find.byType(RawTooltip))
+          .ensureTooltipVisible();
       await tester.pumpAndSettle();
+      expect(scrimAlpha(), greaterThan(0));
 
       expect(find.text('How to use Arber'), findsOneWidget);
       expect(find.text('Prepare the spreadsheet'), findsOneWidget);
@@ -53,6 +72,11 @@ void main() {
         expect(find.text('Arber 1.3.0').hitTestable(), findsOneWidget);
         expect(tester.takeException(), isNull);
       }
+
+      RawTooltip.dismissAllToolTips();
+      await tester.pumpAndSettle();
+      expect(find.text('How to use Arber'), findsNothing);
+      expect(scrimAlpha(), 0);
     });
   }
 }

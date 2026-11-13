@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:arber/application.dart';
 import 'package:arber/data/constants.dart';
 import 'package:arber/logic/blocs/update/update_cubit.dart';
 import 'package:arber/services/prefs_migration_service.dart';
+import 'package:arber/services/updater_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +23,9 @@ void main() async {
     // open at all with ENTITLEMENT_NOT_FOUND.
     if (Platform.isMacOS) FilePicker.skipEntitlementsChecks(),
   ]);
+
+  // After an update on macOS the previous bundle is still next to this one.
+  unawaited(UpdaterService.removePreviousVersion());
 
   // The window's size, minimum size and title bar are set natively:
   // macos/Runner/MainFlutterWindow.swift and windows/runner/main.cpp.

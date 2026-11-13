@@ -26,7 +26,19 @@ class MainScreen extends StatelessWidget {
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: body(context),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            body(context),
+            const HelpScrim(),
+            // Above the scrim, so Dash stays bright next to the help card.
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Stack(children: [bird(), const Description()]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -56,13 +68,6 @@ class MainScreen extends StatelessWidget {
             BackgroundField(
               borderRadius: leftRoundBorderRadius,
               child: const ArbInput(),
-            ),
-            const Spacer(),
-            Stack(
-              children: [
-                bird(),
-                const Description(),
-              ],
             ),
           ],
         );

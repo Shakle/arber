@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "Shakle's Forge" "\0"
-            VALUE "FileDescription", "arber" "\0"
+            VALUE "FileDescription", "Arber" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "arber" "\0"
             VALUE "LegalCopyright", "Copyright © 2026 Shakle's Forge All rights reserved." "\0"
             VALUE "OriginalFilename", "arber.exe" "\0"
-            VALUE "ProductName", "arber" "\0"
+            VALUE "ProductName", "Arber" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

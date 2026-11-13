@@ -91,6 +91,49 @@ void main() {
     });
   });
 
+  group('renameLegacyBundle', () {
+    late Directory root;
+    late bool caseInsensitive;
+
+    setUp(() {
+      root = Directory.systemTemp.createTempSync('arber_rename_test_');
+      Directory('${root.path}/case_probe').createSync();
+      caseInsensitive = Directory('${root.path}/CASE_PROBE').existsSync();
+      Directory('${root.path}/case_probe').deleteSync();
+    });
+    tearDown(() => root.deleteSync(recursive: true));
+
+    /// A fake bundle called [name] in [root] whose `version` file says '1'.
+    String bundle(String name) {
+      final Directory directory = Directory('${root.path}/$name')..createSync();
+      File('${directory.path}/version').writeAsStringSync('1');
+      return directory.path;
+    }
+
+    List<String> names() => [
+      for (final FileSystemEntity entity in root.listSync())
+        entity.path.substring(entity.path.lastIndexOf('/') + 1),
+    ]..sort();
+
+    test('renames arber.app to Arber.app on a case-insensitive volume', () async {
+      final String renamed = await UpdaterService.renameLegacyBundle(
+        bundle('arber.app'),
+      );
+
+      expect(names(), [caseInsensitive ? 'Arber.app' : 'arber.app']);
+      expect(File('$renamed/version').readAsStringSync(), '1');
+    });
+
+    test('leaves any other name alone', () async {
+      for (final String name in ['Arber.app', 'Arber Beta.app']) {
+        final String path = bundle(name);
+        expect(await UpdaterService.renameLegacyBundle(path), path);
+      }
+
+      expect(names(), ['Arber Beta.app', 'Arber.app']);
+    });
+  });
+
   group('windowsInstallScript', () {
     final String script = UpdaterService.windowsInstallScript(
       appPid: 4242,

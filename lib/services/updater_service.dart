@@ -76,7 +76,7 @@ class UpdaterService {
 
   /// Puts the bundle at [source] in place of the bundle at [target], keeping
   /// the old one at [previousBundlePath] until the new version deletes it on
-  /// start ([removePreviousVersion]).
+  /// start ([tidyUpInstall]).
   ///
   /// This runs in the app itself, before it quits: macOS lets an app replace
   /// bundles signed by its own team. Done by a helper after the app has quit,
@@ -131,25 +131,61 @@ class UpdaterService {
   /// Where [swapBundle] keeps the replaced bundle of [target].
   static String previousBundlePath(String target) => '$target.old';
 
-  /// Deletes the bundle an update left next to this app ([swapBundle]). Run on
-  /// start: by now the old version has quit, and macOS lets the app delete a
-  /// bundle of its own team. Never throws.
-  static Future<void> removePreviousVersion() async {
+  /// Tidies up the install on start: deletes the bundle an update left next to
+  /// this app ([swapBundle]) and renames a bundle still called `arber.app`
+  /// ([renameLegacyBundle]). By now the old version has quit, and macOS lets
+  /// the app change bundles of its own team. Never throws.
+  static Future<void> tidyUpInstall() async {
     if (!Platform.isMacOS) return;
     try {
       // <bundle>.app/Contents/MacOS/<executable>
       final String bundle = File(Platform.resolvedExecutable).parent.parent.parent.path;
       if (!bundle.endsWith('.app')) return;
-      await removePreviousBundle(bundle);
+
+      try {
+        await removePreviousBundle(bundle);
+      } catch (_) {
+        // Only disk space is at stake; the next start tries again.
+      }
+      await renameLegacyBundle(bundle);
     } catch (_) {
-      // Only disk space is at stake; the next start tries again.
+      // Only the name Finder and the Dock show is at stake; the next start
+      // tries again.
     }
   }
 
-  /// [removePreviousVersion] for the bundle at [bundle].
+  /// Deletes the bundle [swapBundle] left next to the bundle at [bundle].
   static Future<void> removePreviousBundle(String bundle) async {
     final Directory previous = Directory(previousBundlePath(bundle));
     if (await previous.exists()) await previous.delete(recursive: true);
+  }
+
+  /// The bundle's name before the app was called Arber. An update keeps the
+  /// name of the bundle it replaces ([swapBundle]), so installs that update
+  /// themselves stay `arber.app` until [renameLegacyBundle] renames them.
+  static const String _legacyBundleName = 'arber.app';
+  static const String _bundleName = 'Arber.app';
+
+  /// Renames the bundle at [bundle] from `arber.app` to `Arber.app`, the name
+  /// Finder and the Dock show, and returns where the bundle is afterwards. A
+  /// bundle with any other name is left alone: the user may have chosen it.
+  ///
+  /// Only on a case-insensitive volume, where the old path still leads to the
+  /// bundle: the running app keeps loading its resources through that path.
+  static Future<String> renameLegacyBundle(String bundle) async {
+    // The real path has the name as it is on disk, whatever case [bundle] has.
+    final String current = await Directory(bundle).resolveSymbolicLinks();
+    final int slash = current.lastIndexOf('/');
+    if (current.substring(slash + 1) != _legacyBundleName) return bundle;
+
+    final Directory renamed = Directory('${current.substring(0, slash)}/$_bundleName');
+    // On a case-sensitive volume this is either missing or another bundle.
+    if (!await renamed.exists() || await renamed.resolveSymbolicLinks() != current) {
+      return bundle;
+    }
+
+    await Directory(current).rename(renamed.path);
+    return renamed.path;
   }
 
   Future<void> _unpack(String archivePath, Directory destination) async {

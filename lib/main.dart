@@ -24,8 +24,9 @@ void main() async {
     if (Platform.isMacOS) FilePicker.skipEntitlementsChecks(),
   ]);
 
-  // After an update on macOS the previous bundle is still next to this one.
-  unawaited(UpdaterService.removePreviousVersion());
+  // After an update on macOS the previous bundle is still next to this one,
+  // and installs from before the rename are still called arber.app.
+  unawaited(UpdaterService.tidyUpInstall());
 
   // The window's size, minimum size and title bar are set natively:
   // macos/Runner/MainFlutterWindow.swift and windows/runner/main.cpp.

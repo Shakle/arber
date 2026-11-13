@@ -4,6 +4,7 @@ import 'package:arber/theme/borders.dart';
 import 'package:arber/theme/colors.dart';
 import 'package:arber/view/widgets/animations/dash.dart';
 import 'package:arber/view/widgets/animations/success_animation.dart';
+import 'package:arber/view/widgets/animations/update_badge.dart';
 import 'package:arber/view/widgets/background_field.dart';
 import 'package:arber/view/widgets/basf_logo.dart';
 import 'package:arber/view/widgets/buttons/generate_button.dart';
@@ -95,16 +96,7 @@ class MainScreen extends StatelessWidget {
                       duration: const Duration(milliseconds: 250),
                       child: switch(state) {
                         UpdateChecked(:final isUpdateAvailable)
-                        when isUpdateAvailable => Row(
-                          children: [
-                            const Icon(Icons.arrow_left),
-                            BackgroundField(
-                              borderRadius: BorderRadius.circular(30),
-                              padding: const EdgeInsets.all(9),
-                              child: const Text('Update available 🦾'),
-                            ),
-                          ],
-                        ),
+                        when isUpdateAvailable => const UpdateBadge(),
                        _ => const SizedBox(),
                       },
                     );
